@@ -78,7 +78,7 @@ def post_processing(args):
     logger.debug("Found some rar files: " + ", ".join(rar_files))
     for rar_file in rar_files:
         logger.debug("rar file \"%s\", try to unrar it" % (rar_file))
-        process = Popen(["unrar", "x", rar_file, abs_path], stdout=PIPE, stderr=PIPE)
+        process = Popen(["unrar", "x", "-o+", rar_file, abs_path], stdout=PIPE, stderr=PIPE)
         stdout, stderr = process.communicate()
         logger.debug(stderr)
 
