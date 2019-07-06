@@ -83,7 +83,7 @@ def post_processing(args):
             for line in iter(process.stderr.readline, b''):
                 logging.info('got line from subprocess: %r', line)
         exitcode = process.wait()
-        logger.debug("unrar output: " + exitcode)
+        logger.debug("unrar output: %d" % exitcode)
 
     ## Import all non-compressed video files
     video_files = [files_with_ext(abs_path, ext) for ext in allowed_ext]
