@@ -1,5 +1,19 @@
-import os, fnmatch, argparse, subprocess
+import os, fnmatch, argparse, subprocess, logging
 from shutil import copy
+from parse import parse_cfg
+
+## Parse the config
+config_file = os.path.dirname(os.path.abspath(__file__)) + '/config.txt' 
+cfg = parse_cfg(config_file, "client")
+
+## Setup the client logging file
+client_log = "%s/%s" % (cfg.client_logs, "client.log")
+logging.basicConfig(filename=client_log, filemode='a', 
+                    format='%(asctime)s - %(levelname)s: %(message)s')
+
+## Set the logger and its level
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 allowed_ext = ["mkv", "mp4"]
 synoclient_path = "/data/synoindex_scripts/client.py"
@@ -17,7 +31,6 @@ def files_with_ext(path, ext):
 def add_file_to_syno(file_path, synoclient_path):
 	''' Add a file to the SynoIndex via webserver. '''
 
-	print("Add to synoindex: %s" % file_path)
 	process = subprocess.Popen(["python", synoclient_path, "-o", "a", "-f", file_path], 
 							   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	stdout, stderr = process.communicate()
@@ -61,7 +74,9 @@ def post_processing(args):
 
 	## If there are RAR files extract them into the top directory
 	rar_files = files_with_ext(abs_path, "rar")
+    logger.debug("Found some rar files: " + ", ".join(rar_files))
 	for rar_file in rar_files:
+        logger.debug("rar file \"%s\", try to unrar it" % (rar_file))
 		process = subprocess.Popen(["unrar", "x", rar_file], stdout=PIPE, stderr=PIPE)
 
 	## Import all non-compressed video files
