@@ -1,4 +1,5 @@
 import os, fnmatch, argparse, subprocess, logging
+from subprocess import Popen, PIPE, STDOUT
 from shutil import copy
 from parse import parse_cfg
 
@@ -58,32 +59,37 @@ def copy_file(new_dir, args):
 	return new_dir
 	
 def post_processing(args):
-	''' Post processing '''
+    ''' Post processing '''
 
-	## Get the absolute path
-	abs_path = os.path.join(args.directory, args.name)
-	
-	## If torrent is a single file
-	if os.path.isfile(abs_path):
-	
-		## Create new directory
-		new_dir = create_dir_owner(args)
+    ## Get the absolute path
+    abs_path = os.path.join(args.directory, args.name)
 
-		## Copy the file to the new directory
-		abs_path = copy_file(new_dir, args)
+    ## If torrent is a single file
+    if os.path.isfile(abs_path):
 
-	## If there are RAR files extract them into the top directory
-	rar_files = files_with_ext(abs_path, "rar")
+        ## Create new directory
+        new_dir = create_dir_owner(args)
+
+        ## Copy the file to the new directory
+        abs_path = copy_file(new_dir, args)
+
+    ## If there are RAR files extract them into the top directory
+    rar_files = files_with_ext(abs_path, "rar")
     logger.debug("Found some rar files: " + ", ".join(rar_files))
-	for rar_file in rar_files:
+    for rar_file in rar_files:
         logger.debug("rar file \"%s\", try to unrar it" % (rar_file))
-		process = subprocess.Popen(["unrar", "x", rar_file], stdout=PIPE, stderr=PIPE)
+        process = Popen(["unrar", "x", rar_file], stdout=PIPE, stderr=PIPE)
+        with process.stderr:
+            for line in iter(process.stderr.readline, b''):
+                logging.info('got line from subprocess: %r', line)
+        exitcode = process.wait()
+        logger.debug("unrar output: " + exitcode)
 
-	## Import all non-compressed video files
-	video_files = [files_with_ext(abs_path, ext) for ext in allowed_ext]
-	video_files = [i for sl in video_files for i in sl]
-	for video in video_files:
-		add_file_to_syno(video, synoclient_path)
+    ## Import all non-compressed video files
+    video_files = [files_with_ext(abs_path, ext) for ext in allowed_ext]
+    video_files = [i for sl in video_files for i in sl]
+    for video in video_files:
+        add_file_to_syno(video, synoclient_path)
 		
 def main():
 	args = argparse.Namespace()
