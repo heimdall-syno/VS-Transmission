@@ -79,11 +79,8 @@ def post_processing(args):
     for rar_file in rar_files:
         logger.debug("rar file \"%s\", try to unrar it" % (rar_file))
         process = Popen(["unrar", "x", rar_file], stdout=PIPE, stderr=PIPE)
-        with process.stderr:
-            for line in iter(process.stderr.readline, b''):
-                logging.info('got line from subprocess: %r', line)
-        exitcode = process.wait()
-        logger.debug("unrar output: %d" % exitcode)
+        stdout, stderr = process.communicate()
+        logger.debug(stderr)
 
     ## Import all non-compressed video files
     video_files = [files_with_ext(abs_path, ext) for ext in allowed_ext]
