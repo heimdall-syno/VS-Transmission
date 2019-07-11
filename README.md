@@ -27,7 +27,8 @@ Tools                                             | /tools                | rw
 Dokus                                             | /dokus                | rw
 video                                             | /video                | rw
 Filme                                             | /filme                | rw
-Serien  										  |	/serien               | rw
+Serien  					  | /serien               | rw
+Anime						  | /anime                | rw
 ```
 
 Network settings:
@@ -66,6 +67,7 @@ LOCAL_NETWORK                             | 192.168.178.0/24                    
     /video = /volume1/video
     /dokus = /volume1/Dokus
     /tools = /volume1/Tools
+    /anime = /volume1/Anime
 	```
 
 2. Make sure that web.py module is supported by python:
