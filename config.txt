@@ -15,3 +15,4 @@ client_logs = /data/logs
 /video = /volume1/video
 /dokus = /volume1/Dokus
 /tools = /volume1/Tools
+/anime = /volume1/Anime
