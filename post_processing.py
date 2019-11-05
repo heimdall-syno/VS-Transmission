@@ -57,7 +57,17 @@ def copy_file(new_dir, args):
 		copy(abs_path, new_dir)
 		os.chown(new_file_path, args.userid, args.groupid)
 	return new_dir
-	
+
+def copy_file_to_handbrake(src, args):
+    ''' Copy file to the handbrake watch directory and change owner. '''
+
+    src_name = os.path.basename(src)
+    dst = os.join("handbrake", "watch", src_name)
+    if not os.path.exists(dst):
+        copy(src, dst)
+        os.chown(dst, args.userid, args.groupid)
+    return dst
+        
 def post_processing(args):
     ''' Post processing '''
 
@@ -87,6 +97,12 @@ def post_processing(args):
     video_files = [i for sl in video_files for i in sl]
     for video in video_files:
         add_file_to_syno(video, synoclient_path)
+        
+    ## After the original video files were added to the VS, check whether its x264 codec based
+    ## If so then copy it to the watch directory of the handbrake docker container
+    for video in video_files:
+        if ("x264" in src):
+            copy_file_to_handbrake(video, args)
 		
 def main():
 	args = argparse.Namespace()

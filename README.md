@@ -27,8 +27,9 @@ Tools                                             | /tools                | rw
 Dokus                                             | /dokus                | rw
 video                                             | /video                | rw
 Filme                                             | /filme                | rw
-Serien  					  | /serien               | rw
-Anime						  | /anime                | rw
+Serien                                            | /serien               | rw
+Anime                                             | /anime                | rw
+docker/handbrake                                  | /handbrake            | rw
 ```
 
 Network settings:
@@ -48,6 +49,8 @@ TRANSMISSION_PEER_PORT                    | 54754                               
 TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME | /data/synoindex_scripts/post_processing.sh | Fix
 TRANSMISSION_HOME                         | /data/transmission-home                    | Fix
 LOCAL_NETWORK                             | 192.168.178.0/24                           | Fix
+OPENVPN_USERNAME                          | <username>                                 | Fix
+OPENVPN_PASSWORD                          | <password>                                 | Fix
 ```
 ------
 #### Tool configuration
