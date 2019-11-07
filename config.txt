@@ -8,6 +8,7 @@ server_logs = /volume1/docker/transmission/logs
 
 [Client]
 client_logs = /data/logs
+handbrake = /handbrake/watch
 
 [Mapping]
 /serien = /volume1/Serien
