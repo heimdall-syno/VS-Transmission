@@ -50,22 +50,15 @@ def create_dir_owner(args):
 		os.chown(new_dir_path, args.userid, args.groupid)
 	return new_dir_path
 
-def copy_file(src, dst, name, args):
+def copy_file(src, dst, args):
 	''' Copy file to directory and change owner. '''
 
 	## Without renaming the file
 	file_name = os.path.basename(src)
 	new_file_path = os.path.join(dst, file_name)
-	if not name and not os.path.exists(new_file_path):
+	if not os.path.exists(new_file_path):
 		copy(src, dst)
 		os.chown(new_file_path, args.userid, args.groupid)
-		return dst
-
-	## Copy and rename the file
-	dst_name = os.path.join(dst, name)
-	if name and not os.path.exists(dst_name):
-		copyfile(src, dst_name)
-		os.chown(dst_name, args.userid, args.groupid)
 		return dst
 
 	return 0
@@ -74,7 +67,7 @@ def copy_file_args(dst, args):
 	''' Copy file to directory and change owner. '''
 
 	## Copy the video file to the specified destination
-	new_file = copy_file(args.directory, dst, 0, args)
+	new_file = copy_file(args.directory, dst, args)
 	if not new_file:
 		logging.error("Could not copy file (%s) to destination (%s)" % (args.directory, dst))
 		return 0
@@ -85,21 +78,25 @@ def copy_file_to_handbrake(src, args):
 	''' Copy file to the handbrake watch directory and change owner. '''
 
 	## Get all media info about the file
-	info = ffprobe_file(src)
-	codec = info["video_codec"]
+	codec = ffprobe_file(src)["video_codec"]
 
 	## Check whether it is x264 based
 	if codec != "h264" and codec != "x264":
 		return 0
 
 	## Copy the video file to the handbrake watch directory
-	src_dir = src.split(os.sep)[-2]
-	dst_name = "%s%s" % (src_dir, os.path.splitext(src)[1])
-	new_file = copy_file(src, cfg.handbrake, dst_name, args)
+	watch_dir = os.path.join(cfg.handbrake, "watch")
+	new_file = copy_file(src, watch_dir, args)
 	if not new_file:
 		logging.error("Could not copy file (%s) to handbrake watch directory" % (src))
 		return 0
 	logger.debug("Copied file (%s) to handbrake watch directory" % (src))
+
+	## Create convert-file to note the original path
+	file_name = "%s.txt" % (".".join(os.path.basename(src).split(".")[::-1]))
+	convert_file = os.path.join(cfg.handbrake, "convert", file_name)
+	with open(convert_file, 'w') as f: f.write('Source: %s' % src)
+	logger.debug("Create convert file (%s)" % (convert_file))
 
 	return new_file
 
