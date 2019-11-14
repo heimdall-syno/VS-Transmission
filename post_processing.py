@@ -18,10 +18,13 @@ logging.basicConfig(filename=client_log, filemode='a',
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-allowed_ext = ["mkv", "mp4"]
 synoclient_path = "/data/synoindex_scripts/client.py"
 
-def find_files_with_extension(path, ext):
+#####################################################################
+###                    File system functions                      ###
+#####################################################################
+
+def files_find_ext(path, ext):
 	''' Find all files in the given path with the extension. '''
 
 	ext_files = []
@@ -31,26 +34,7 @@ def find_files_with_extension(path, ext):
 				ext_files.append(os.path.join(root, filename))
 	return ext_files
 
-def add_file_to_syno(file_path, synoclient_path):
-	''' Add a file to the SynoIndex via webserver. '''
-
-	process = subprocess.Popen(["python", synoclient_path, "-o", "a", "-f", file_path],
-							   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	stdout, stderr = process.communicate()
-	if(stderr): print(stderr)
-	if(stdout): print(stdout)
-
-def create_dir_owner(args):
-	''' Create a directory by the file name and change owner. '''
-
-	dir_name = ".".join(args.name.split(".")[:-1])
-	new_dir_path = os.path.join(args.directory, dir_name)
-	if not os.path.exists(new_dir_path):
-		os.mkdir(new_dir_path)
-		os.chown(new_dir_path, args.userid, args.groupid)
-	return new_dir_path
-
-def copy_file(src, dst, args):
+def file_copy(src, dst, args):
 	''' Copy file to directory and change owner. '''
 
 	## Without renaming the file
@@ -63,16 +47,43 @@ def copy_file(src, dst, args):
 
 	return 0
 
-def copy_file_args(dst, args):
+def file_copy_args(dst, args):
 	''' Copy file to directory and change owner. '''
 
 	## Copy the video file to the specified destination
-	new_file = copy_file(args.directory, dst, args)
+	new_file = file_copy(args.directory, dst, args)
 	if not new_file:
 		logging.error("Could not copy file (%s) to destination (%s)" % (args.directory, dst))
 		return 0
 
 	return new_file
+
+def directory_create_owner(args):
+	''' Create a directory by the file name and change owner. '''
+
+	dir_name = ".".join(args.name.split(".")[:-1])
+	new_dir_path = os.path.join(args.directory, dir_name)
+	if not os.path.exists(new_dir_path):
+		os.mkdir(new_dir_path)
+		os.chown(new_dir_path, args.userid, args.groupid)
+	return new_dir_path
+
+#####################################################################
+###                      Synology functions                       ###
+#####################################################################
+
+def syno_add_file(file_path, synoclient_path):
+	''' Add a file to the SynoIndex via webserver. '''
+
+	process = subprocess.Popen(["python", synoclient_path, "-o", "a", "-f", file_path],
+							   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	stdout, stderr = process.communicate()
+	if(stderr): print(stderr)
+	if(stdout): print(stdout)
+
+#####################################################################
+###                      Handbrake functions                      ###
+#####################################################################
 
 def copy_file_to_handbrake(src, args):
 	''' Copy file to the handbrake watch directory and change owner. '''
@@ -86,16 +97,16 @@ def copy_file_to_handbrake(src, args):
 
 	## Copy the video file to the handbrake watch directory
 	watch_dir = os.path.join(cfg.handbrake, "watch")
-	new_file = copy_file(src, watch_dir, args)
+	new_file = file_copy(src, watch_dir, args)
 	if not new_file:
 		logging.error("Could not copy file (%s) to handbrake watch directory" % (src))
 		return 0
 	logger.debug("Copied file (%s) to handbrake watch directory" % (src))
 
 	## Create convert-file to note the original path
-	file_name = "%s.txt" % (".".join(os.path.basename(src).split(".")[::-1]))
+	file_name = "%s.txt" % (".".join(os.path.basename(src).split(".")[:-1]))
 	convert_file = os.path.join(cfg.handbrake, "convert", file_name)
-	with open(convert_file, 'w') as f: f.write('Source: %s' % src)
+	with open(convert_file, 'w+') as f: f.write('Source: %s' % src)
 	logger.debug("Create convert file (%s)" % (convert_file))
 
 	return new_file
@@ -106,11 +117,11 @@ def post_processing(args):
 	## If torrent is a single file create a directory and copy that file
 	abs_path = os.path.join(args.directory, args.name)
 	if os.path.isfile(abs_path):
-		new_dir = create_dir_owner(args)
-		abs_path = copy_file_args(new_dir, args)
+		new_dir = directory_create_owner(args)
+		abs_path = file_copy_args(new_dir, args)
 
 	## If there are RAR files extract them into the top directory
-	rar_files = find_files_with_extension(abs_path, "rar")
+	rar_files = files_find_ext(abs_path, "rar")
 	logger.debug("Found some rar files: " + ", ".join(rar_files))
 	for rar_file in rar_files:
 		logger.debug("rar file \"%s\", try to unrar it" % (rar_file))
@@ -119,23 +130,27 @@ def post_processing(args):
 		logger.debug(stderr)
 
 	## Import all non-compressed video files
-	video_files = [find_files_with_extension(abs_path, ext) for ext in allowed_ext]
+	video_files = [files_find_ext(abs_path, ext) for ext in ["mkv", "mp4"]]
 	video_files = [i for sl in video_files for i in sl]
 	for video in video_files:
-		add_file_to_syno(video, synoclient_path)
+		syno_add_file(video, synoclient_path)
 
 	## If the video file is x264-based copy it to the watch directory of the handbrake
 	## docker container
-	for video in video_files:
-		copy_file_to_handbrake(video, args)
+	if (args.handbrake):
+		for video in video_files:
+			copy_file_to_handbrake(video, args)
 
 def main():
+
+	## Parse the shell arguments
 	args = argparse.Namespace()
 	parser = argparse.ArgumentParser(description='Post Processing of torrents via transmission')
 	parser.add_argument('-n','--name', help='Name of the torrent', required=True)
 	parser.add_argument('-d','--directory', help='Directory of the torrent', required=True)
 	parser.add_argument('-u','--userid', help='ID of the user (PUID)', type=int, required=True)
 	parser.add_argument('-g','--groupid', help='ID of the group (PGID)', type=int, required=True)
+	parser.add_argument('-b','--handbrake', help='Pipe to handbrake', action='store_true', required=False)
 	args = parser.parse_args()
 
 	## Post Processing
