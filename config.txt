@@ -5,6 +5,7 @@
 [Server]
 server_port = 32699
 server_logs = /volume1/docker/transmission/logs
+handbrake_output = /volume1/docker/handbrake/output
 
 [Client]
 client_logs = /data/logs

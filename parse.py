@@ -6,7 +6,7 @@ from collections import namedtuple
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-cfg = namedtuple('cfg', 'port ip url server_logs client_logs handbrake mapping')
+cfg = namedtuple('cfg', 'port ip url server_logs handbrake_output client_logs handbrake mapping')
 cfg.__new__.__defaults__ = (None,) * len(cfg._fields)
 
 synoindex_modes = ['a']
@@ -42,6 +42,7 @@ def parse_cfg(config_file, mode):
 
 	## Get the debug files
 	server_logs = config.get(secs[0], 'server_logs')
+	handbrake_output = config.get(secs[0], 'handbrake_output')
 	client_logs = config.get(secs[1], 'client_logs')
 	handbrake = config.get(secs[1], 'handbrake')
 
@@ -56,7 +57,7 @@ def parse_cfg(config_file, mode):
 			logger.error("Error: Mapping path doesnt exist: \"" + check_path + "\"")
 			exit()
 
-	return cfg(port, ip, url, server_logs, client_logs, handbrake, mapping)
+	return cfg(port, ip, url, server_logs, handbrake_output, client_logs, handbrake, mapping)
 
 def validate_input(mapping, option, filepath):
 	""" Validate the query arguments. """

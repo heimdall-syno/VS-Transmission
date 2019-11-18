@@ -106,7 +106,7 @@ def copy_file_to_handbrake(src, args):
 	## Create convert-file to note the original path
 	file_name = "%s.txt" % (".".join(os.path.basename(src).split(".")[:-1]))
 	convert_file = os.path.join(cfg.handbrake, "convert", file_name)
-	with open(convert_file, 'w+') as f: f.write('Source: %s' % src)
+	with open(convert_file, 'w+') as f: f.write('%s' % src)
 	logger.debug("Create convert file (%s)" % (convert_file))
 
 	return new_file
