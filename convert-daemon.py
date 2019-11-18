@@ -5,7 +5,9 @@ from watchdog.events import FileSystemEventHandler
 from server import server
 from parse import parse_cfg
 from mediainfo import ffprobe_file
-from namingseries import daemon_mode
+from namingseries import naming_episode, get_original_path
+
+season_types = ["Serien", "Dokus", "Anime"]
 
 ## Parse the config
 config_file = os.path.dirname(os.path.abspath(__file__)) + '/config.txt'
@@ -26,6 +28,8 @@ class HandbrakeHandler(FileSystemEventHandler):
         modify_path = event.src_path
         if os.path.isfile(modify_path):
 
+            print(ffprobe_file(modify_path))
+
             ## Get the duration as indicator if the file is complete
             duration = ffprobe_file(modify_path)["duration"]
 
@@ -37,21 +41,24 @@ class HandbrakeHandler(FileSystemEventHandler):
             ## otherwise update the duration
             elif (stats.get(modify_path) == "N/A" and duration != "N/A"):
                 stats[modify_path] = (duration, True)
-                convert_finished(stats)
-            #print(stats)
+                convert_finished(modify_path)
+        print(stats)
 
-def convert_finished(stats):
-    for key, val in stats.iteritems():
-        if (val == True):
-            print("End of convertion for file: %s" %(key))
-            convert = "%s.txt" % os.path.splitext(key)[0].replace("/output/", "/convert/")
-            args = argparse.Namespace(daemon=True, file=key, convert=convert)
-            daemon_mode(args)
+def convert_finished(path):
+
+    print("End of convertion for file: %s" %(path))
+    convert = "%s.txt" % os.path.splitext(path)[0].replace("/output/", "/convert/")
+    get_original_path(convert)
+
+    if any(season_type in convert for season_type in season_types):
+        args = argparse.Namespace(file=path, convert=convert)
+        print("HIER")
+        #naming_episode(args)
 
 def main():
     event_handler = HandbrakeHandler()
     observer = Observer()
-    observer.schedule(event_handler, path=cfg.handbrake_output, recursive=True)
+    observer.schedule(event_handler, path=cfg.handbrake_output, recursive=False)
     observer.start()
 
     try:
