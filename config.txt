@@ -19,6 +19,6 @@ client_logs = /data/logs
 
 [Handbrake]
 handbrake = /handbrake
-handbrake_output = /volume1/docker/handbrake/test
+handbrake_output = /volume1/docker/handbrake/output
 handbrake_movies = Filme, video
 handbrake_series = Serien, Dokus, Anime
