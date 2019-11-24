@@ -1,14 +1,10 @@
-import sys, glob, os, cv2, re, warnings, csv, argparse, logging
+import sys, glob, os, cv2, re, warnings, csv, argparse, json
 from distutils.util import strtobool
 from shutil import move
 from collections import Counter
 from argparse import Namespace
 
 from parse import parse_cfg
-
-## Set the logger and its level
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 season_desc = "Staffel"
 
@@ -40,7 +36,7 @@ def analyze_series(series):
 	height = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
 	series.resolution = get_resolution(height)
 	if(series.resolution == -1):
-		logging.debug("The resolution of the series episode was invalid")
+		print("The resolution of the series episode was invalid")
 		exit()
 
 	## Analyze the current season number
@@ -64,18 +60,9 @@ def analyze_series(series):
 
 	return series
 
-def get_original_path(convert):
-	with open(convert, "r") as f: original_path = f.readlines()[0]
-	map = [m for m in cfg.mapping if original_path.split(os.sep)[1] in m[0]][0]
-	original_path = original_path.replace(map[0], map[1])
-	return original_path
-
 def naming_episode(args):
 
-	logging.debug("Start naming process for file: %s" % args.file)
-
-	## Get the original path of the video file on the host system
-	original_path = get_original_path(args.convert)
+	print("  Naming: Started")
 
 	## Get the delimiter of the video filename
 	delimiters = [".", "-", "_"]
@@ -84,24 +71,20 @@ def naming_episode(args):
 	delimiter = sorted(delimiter_count, key=lambda x: x[1])[-1][0]
 
 	## Get the name of the root series directory
-	series_path = map[1].split(os.sep)[-1]
+	series_path = args.original.split(os.sep)[2]
 
 	## Get all information about the episode and season
 	path = os.path.abspath(os.path.join(args.file, os.pardir))
-	series = Namespace(file=args.file, path=path, delim=delimiter, original=original_path, series_path=series_path)
-	logging.debug("Start analyzing the video file with the following namespace")
-	logging.debug(series)
+	series = Namespace(file=args.file, path=path, delim=delimiter, original=args.original, series_path=series_path)
 	series = analyze_series(series)
+	print("  Analysis Namespace: %s" % series)
 
 	## Move the file back to the original path
 	file_name = "%s.%s.%s%s" % (series.name, series.episode, series.resolution, series.extension)
 	file_dst = os.path.join(series.dst, file_name)
-	logging.debug("Move file %s to %s" % (series.file, file_dst))
+	print("  Moving file: %s" % file_dst)
 	move(series.file, file_dst)
-
-	## Delete the corresponding convert file
-	logging.debug("Delete convert file at %s" % (args.convert))
-	os.remove(args.convert)
+	return file_dst
 
 if __name__ == "__main__":
 

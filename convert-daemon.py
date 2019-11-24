@@ -1,66 +1,78 @@
-import os, time, logging, argparse
+import os, time, argparse
+from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 from server import server
 from parse import parse_cfg
-from mediainfo import ffprobe_file
-from namingseries import naming_episode, get_original_path
-
-season_types = ["Serien", "Dokus", "Anime"]
+from namingseries import naming_episode
 
 ## Parse the config
 config_file = os.path.dirname(os.path.abspath(__file__)) + '/config.txt'
 cfg = parse_cfg(config_file, "server")
 
-## Setup the logging files
-server_log = "%s/%s" % (cfg.server_logs, "convert_daemon.log")
-if not os.path.isfile(server_log): open(server_log, 'a').close()
-
-## Setup the logging format
-logging.basicConfig(filename=server_log, filemode='a',
-					format='%(asctime)s - %(levelname)s: %(message)s')
-
-stats = {}
+def get_original_path(convert):
+	try:
+		with open(convert, "r") as f: original_path = f.readlines()[0]
+		map = [m for m in cfg.mapping if original_path.split(os.sep)[1] in m[0]][0]
+		original_path = original_path.replace(map[0], map[1])
+	except IOError as e:
+		print("Convert file does not exist")
+		return -1
+	return original_path
 
 class HandbrakeHandler(FileSystemEventHandler):
-    def on_modified(self, event):
-        modify_path = event.src_path
-        if os.path.isfile(modify_path):
 
-            print(ffprobe_file(modify_path))
+    def on_deleted(self, event):
 
-            ## Get the duration as indicator if the file is complete
-            duration = ffprobe_file(modify_path)["duration"]
+        ## Check whether handbrake deleted the temporary directory
+        if os.path.splitext(event.src_path)[1] == '':
+            output_dir = os.path.dirname(event.src_path)
+            print("[%s] Handbrake finished converting files:" % datetime.strftime(datetime.now(), "%Y-%m-%d-%H-%M"))
+            new_files = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if
+                         os.path.isfile(os.path.join(output_dir, f))]
 
-            ## If it is not in the stats add it
-            if modify_path not in stats:
-                stats[modify_path] = (duration, False)
+            ## Handle the naming of the converted file
+            for new_file in new_files:
+                print("  Name: %s" %(new_file))
 
-            ## If it is already in the stats and finished then start the naming process
-            ## otherwise update the duration
-            elif (stats.get(modify_path) == "N/A" and duration != "N/A"):
-                stats[modify_path] = (duration, True)
-                convert_finished(modify_path)
-        print(stats)
+                ## Check for the source file, continue if convert file doesnt exist
+                convert = "%s.txt" % os.path.splitext(new_file)[0].replace("/output/", "/convert/").replace("/test/", "/convert/")
+                original = get_original_path(convert)
+                if (original == -1):
+                    continue
 
-def convert_finished(path):
+                ## Check whether the file is a series based file
+                if any(season_type in original.split(os.sep)[2] for season_type in cfg.handbrake_series):
+                    print("  Type: Series-based")
+                    args = argparse.Namespace(file=new_file, original=original)
+                    file_dst = naming_episode(args)
+                    if file_dst:
+                        ## Delete the corresponding convert file
+                        print("Delete convert file at %s" % (convert))
+                        os.remove(convert)
 
-    print("End of convertion for file: %s" %(path))
-    convert = "%s.txt" % os.path.splitext(path)[0].replace("/output/", "/convert/")
-    get_original_path(convert)
+                        # Add to synoindex
+                        server(cfg, "a", file_dst)
 
-    if any(season_type in convert for season_type in season_types):
-        args = argparse.Namespace(file=path, convert=convert)
-        print("HIER")
-        #naming_episode(args)
 
+                ## Check whether the file is a movie based file
+                elif any(movie_type in original.split(os.sep)[2] for movie_type in cfg.handbrake_movies):
+                    print("  Type: Movie-based")
+                    args = argparse.Namespace(file=new_file, original=original)
+                    print("  NOT SUPPORTED RIGHT NOW")
+                    #naming_movies(args)
+                print("  -----------------")
+            print("")
 def main():
+
+    ## initialize the observer on the output directory of handbrake
     event_handler = HandbrakeHandler()
     observer = Observer()
     observer.schedule(event_handler, path=cfg.handbrake_output, recursive=False)
     observer.start()
 
+    ## Check whether second whether handbrake changed something
     try:
         while True:
             time.sleep(1)

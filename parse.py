@@ -6,7 +6,9 @@ from collections import namedtuple
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-cfg = namedtuple('cfg', 'port ip url server_logs handbrake_output client_logs handbrake mapping')
+cfg = namedtuple('cfg', 'port ip url server_logs client_logs mapping '
+						'handbrake handbrake_output handbrake_movies handbrake_series')
+
 cfg.__new__.__defaults__ = (None,) * len(cfg._fields)
 
 synoindex_modes = ['a']
@@ -32,7 +34,7 @@ def parse_cfg(config_file, mode):
 	## Read the config file
 	config = ConfigParser()
 	config.read(config_file)
-	secs = ['Server', 'Client', 'Mapping']
+	secs = ['Server', 'Client', 'Mapping', 'Handbrake']
 	_ = [exit('Error: Section missing') for s in secs if not config.has_section(s)]
 
 	## Get all server configurations from config file
@@ -42,22 +44,28 @@ def parse_cfg(config_file, mode):
 
 	## Get the debug files
 	server_logs = config.get(secs[0], 'server_logs')
-	handbrake_output = config.get(secs[0], 'handbrake_output')
 	client_logs = config.get(secs[1], 'client_logs')
-	handbrake = config.get(secs[1], 'handbrake')
 
-	## Get all mappings from the config
+	## Get all mappings from the config and check whether they exist
 	mapping = config._sections['Mapping']
 	mapping = [m for m in list(mapping.items()) if m[0] != "__name__"]
-
-	## Check whether all mappings really exist
 	for m in mapping:
 		check_path = m[1] if mode == "server" else m[0]
 		if not os.path.exists(check_path):
 			logger.error("Error: Mapping path doesnt exist: \"" + check_path + "\"")
 			exit()
 
-	return cfg(port, ip, url, server_logs, handbrake_output, client_logs, handbrake, mapping)
+	## Get all handbrake related configs
+	handbrake = config.get(secs[3], 'handbrake')
+	handbrake_output = config.get(secs[3], 'handbrake_output')
+	handbrake_movies = config.get(secs[3], 'handbrake_movies')
+	handbrake_series = config.get(secs[3], 'handbrake_series')
+	handbrake_movies = handbrake_movies.replace(" ", "").split(",")
+	handbrake_series = handbrake_series.replace(" ", "").split(",")
+
+
+	return cfg(port, ip, url, server_logs, client_logs, mapping, \
+			   handbrake, handbrake_output, handbrake_movies, handbrake_series)
 
 def validate_input(mapping, option, filepath):
 	""" Validate the query arguments. """
