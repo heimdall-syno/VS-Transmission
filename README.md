@@ -71,6 +71,12 @@ OPENVPN_PASSWORD                          | <password>                          
     /dokus = /volume1/Dokus
     /tools = /volume1/Tools
     /anime = /volume1/Anime
+    
+    [Handbrake]
+    handbrake = /handbrake
+    handbrake_output = /volume1/docker/handbrake/output
+    handbrake_movies = Filme, video
+    handbrake_series = Serien, Dokus, Anime
 	```
 
 2. Make sure that web.py module is supported by python:
