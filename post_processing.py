@@ -1,4 +1,4 @@
-import os, fnmatch, argparse, subprocess, logging, sys, shlex, re
+import os, sys, fnmatch, argparse, subprocess
 from subprocess import Popen, PIPE, STDOUT, call
 from shutil import copy, copyfile
 
@@ -11,16 +11,7 @@ from parse import parse_cfg
 config_file = os.path.dirname(os.path.abspath(__file__)) + '/config.txt'
 cfg = parse_cfg(config_file, "client")
 
-## Setup the client logging file
-client_log = "%s/%s" % (cfg.client_logs, "client.log")
-logging.basicConfig(filename=client_log, filemode='a',
-					format='%(asctime)s - %(levelname)s: %(message)s')
-
-## Set the logger and its level
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-synoclient_path = "/data/synoindex_scripts/client.py"
+synoclient_path = "/data/synoindex_scripts/VS-Utils/daemon/client.py"
 
 #####################################################################
 ###                    File system functions                      ###
@@ -55,7 +46,7 @@ def file_copy_args(dst, args):
 	## Copy the video file to the specified destination
 	new_file = file_copy(args.directory, dst, args)
 	if not new_file:
-		logging.error("Could not copy file (%s) to destination (%s)" % (args.directory, dst))
+		print("Error: Could not copy file (%s) to destination (%s)" % (args.directory, dst))
 		return 0
 
 	return new_file
@@ -101,15 +92,15 @@ def copy_file_to_handbrake(src, args):
 	watch_dir = os.path.join(cfg.handbrake, "watch")
 	new_file = file_copy(src, watch_dir, args)
 	if not new_file:
-		logging.error("Could not copy file (%s) to handbrake watch directory" % (src))
+		print("Error: Could not copy file (%s) to handbrake watch directory" % (src))
 		return 0
-	logger.debug("Copied file (%s) to handbrake watch directory" % (src))
+	print("Copied file (%s) to handbrake watch directory" % (src))
 
 	## Create convert-file to note the original path
 	file_name = "%s.txt" % (".".join(os.path.basename(src).split(".")[:-1]))
 	convert_file = os.path.join(cfg.handbrake, "convert", file_name)
 	with open(convert_file, 'w+') as f: f.write('%s' % src)
-	logger.debug("Create convert file (%s)" % (convert_file))
+	print("Create convert file (%s)" % (convert_file))
 
 	return new_file
 
@@ -124,12 +115,12 @@ def post_processing(args):
 
 	## If there are RAR files extract them into the top directory
 	rar_files = files_find_ext(abs_path, "rar")
-	logger.debug("Found some rar files: " + ", ".join(rar_files))
+	print("Found some rar files: " + ", ".join(rar_files))
 	for rar_file in rar_files:
-		logger.debug("rar file \"%s\", try to unrar it" % (rar_file))
+		print("rar file \"%s\", try to unrar it" % (rar_file))
 		process = Popen(["unrar", "x", "-o+", rar_file, abs_path], stdout=PIPE, stderr=PIPE)
 		stdout, stderr = process.communicate()
-		logger.debug(stderr)
+		print(stderr)
 
 	## Import all non-compressed video files
 	video_files = [files_find_ext(abs_path, ext) for ext in ["mkv", "mp4"]]
