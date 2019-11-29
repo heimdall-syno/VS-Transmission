@@ -11,7 +11,7 @@ from parse import parse_cfg
 config_file = os.path.dirname(os.path.abspath(__file__)) + '/config.txt'
 cfg = parse_cfg(config_file, "client")
 
-synoclient_path = "/data/synoindex_scripts/VS-Utils/daemon/client.py"
+synoclient_path = "/data/vs-transmission/VS-Utils/daemon/client.py"
 
 #####################################################################
 ###                    File system functions                      ###
