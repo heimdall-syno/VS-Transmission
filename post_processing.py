@@ -2,6 +2,8 @@ import os, fnmatch, argparse, subprocess, logging, sys, shlex, re
 from subprocess import Popen, PIPE, STDOUT, call
 from shutil import copy, copyfile
 
+## Add modules from the submodule (vs-utils)
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VS-Utils"))
 from mediainfo import ffprobe_file
 from parse import parse_cfg
 
