@@ -114,7 +114,7 @@ def post_processing(args):
 	video_files = [files_find_ext(abs_path, ext) for ext in ["mkv", "mp4"]]
 	video_files = [i for sl in video_files for i in sl]
 	for video in video_files:
-		client(cfg, "a", video)
+		client("a", video)
 
 	## If the video file is x264-based copy it to the watch directory of the handbrake
 	## docker container

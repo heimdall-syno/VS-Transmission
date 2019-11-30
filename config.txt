@@ -1,13 +1,6 @@
 ##############################################################
-##          Config file for the SynoIndex-Server            ##
+##          Config file for the VS-Transmissionr            ##
 ##############################################################
-
-[Server]
-server_port = 32699
-server_logs = /volume1/docker/transmission/logs
-
-[Client]
-client_logs = /data/logs
 
 [Mapping]
 /serien = /volume1/Serien
@@ -18,7 +11,4 @@ client_logs = /data/logs
 /anime = /volume1/Anime
 
 [Handbrake]
-handbrake = /handbrake
-handbrake_output = /volume1/docker/handbrake/output
-handbrake_movies = Filme, video
-handbrake_series = Serien, Dokus, Anime
+handbrake = /docker/handbrake
