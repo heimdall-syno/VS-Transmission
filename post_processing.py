@@ -3,7 +3,9 @@ from subprocess import Popen, PIPE, STDOUT, call
 from shutil import copy, copyfile
 
 ## Add modules from the submodule (vs-utils)
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VS-Utils"))
+cur_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(cur_dir, "VS-Utils"))
+sys.path.append(os.path.join(cur_dir, "VS-SynoIndex"))
 from mediainfo import ffprobe_file
 from parse import parse_cfg
 from client import client
