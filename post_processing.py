@@ -6,12 +6,11 @@ from shutil import copy, copyfile
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VS-Utils"))
 from mediainfo import ffprobe_file
 from parse import parse_cfg
+from client import client
 
 ## Parse the config
 config_file = os.path.dirname(os.path.abspath(__file__)) + '/config.txt'
 cfg = parse_cfg(config_file, "client")
-
-synoclient_path = "/data/vs-transmission/VS-Utils/daemon/client.py"
 
 #####################################################################
 ###                    File system functions                      ###
@@ -60,19 +59,6 @@ def directory_create_owner(args):
 		os.mkdir(new_dir_path)
 		os.chown(new_dir_path, args.userid, args.groupid)
 	return new_dir_path
-
-#####################################################################
-###                      Synology functions                       ###
-#####################################################################
-
-def syno_add_file(file_path, synoclient_path):
-	''' Add a file to the SynoIndex via webserver. '''
-
-	process = subprocess.Popen(["python", synoclient_path, "-o", "a", "-f", file_path],
-							   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	stdout, stderr = process.communicate()
-	if(stderr): print(stderr)
-	if(stdout): print(stdout)
 
 #####################################################################
 ###                      Handbrake functions                      ###
@@ -126,7 +112,7 @@ def post_processing(args):
 	video_files = [files_find_ext(abs_path, ext) for ext in ["mkv", "mp4"]]
 	video_files = [i for sl in video_files for i in sl]
 	for video in video_files:
-		syno_add_file(video, synoclient_path)
+		client(cfg, "a", video)
 
 	## If the video file is x264-based copy it to the watch directory of the handbrake
 	## docker container
