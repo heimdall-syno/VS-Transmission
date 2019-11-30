@@ -11,8 +11,8 @@ from parse import parse_cfg
 from client import client
 
 ## Parse the config
-config_file = os.path.dirname(os.path.abspath(__file__)) + '/config.txt'
-cfg = parse_cfg(config_file, "client")
+config_file = os.path.join(cur_dir, "config.txt")
+cfg = parse_cfg(config_file, "vs-transmission", "docker")
 
 #####################################################################
 ###                    File system functions                      ###
@@ -114,13 +114,15 @@ def post_processing(args):
 	video_files = [files_find_ext(abs_path, ext) for ext in ["mkv", "mp4"]]
 	video_files = [i for sl in video_files for i in sl]
 	for video in video_files:
-		client("a", video)
+		video_hostpath = parse_dockerpath(cfg.mapping, video)
+		client(video_hostpath)
 
 	## If the video file is x264-based copy it to the watch directory of the handbrake
 	## docker container
 	if (args.handbrake):
 		for video in video_files:
-			copy_file_to_handbrake(video, args)
+			video_hostpath = parse_dockerpath(cfg.mapping, video)
+			copy_file_to_handbrake(video_hostpath, args)
 
 def main():
 
