@@ -1,4 +1,4 @@
-import os, sys, fnmatch, argparse, subprocess
+import os, sys, fnmatch, argparse
 from datetime import datetime
 
 ## Add modules from the submodule (vs-utils)
