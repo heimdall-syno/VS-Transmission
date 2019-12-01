@@ -3,6 +3,7 @@
 ##############################################################
 
 [Mapping]
+/docker = /volume1/docker
 /serien = /volume1/Serien
 /filme = /volume1/Filme
 /video = /volume1/video
