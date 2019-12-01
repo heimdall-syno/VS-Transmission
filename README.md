@@ -38,8 +38,8 @@ Name     | Driver
 ---------+---------
 bridge   | bridge
 ```
-    
-    
+
+
 Environment settings:
 ```
 Variable                                    Value                                       Fix or overwritten
@@ -57,13 +57,6 @@ OPENVPN_PASSWORD                          | <password>                          
 
 1. Make your changes to the config-file. For example:
 	```
-    [Server]
-    server_port = 32699
-    server_logs = /volume1/docker/transmission/logs
-
-    [Client]
-    client_logs = /data/logs
-
     [Mapping]
     /serien = /volume1/Serien
     /filme = /volume1/Filme
@@ -71,12 +64,10 @@ OPENVPN_PASSWORD                          | <password>                          
     /dokus = /volume1/Dokus
     /tools = /volume1/Tools
     /anime = /volume1/Anime
-    
+
     [Handbrake]
-    handbrake = /handbrake
-    handbrake_output = /volume1/docker/handbrake/output
-    handbrake_movies = Filme, video
-    handbrake_series = Serien, Dokus, Anime
+    handbrake = /docker/handbrake
+    codecs = x264, h264
 	```
 
 2. Make sure that web.py module is supported by python:
