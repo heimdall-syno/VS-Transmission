@@ -12,3 +12,4 @@
 
 [Handbrake]
 handbrake = /docker/handbrake
+codecs = x264, h264
