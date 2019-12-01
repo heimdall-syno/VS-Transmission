@@ -44,9 +44,9 @@ def copy_file_to_handbrake(args, source, source_host, root_host):
 	if not output:
 		errmsg("Could not copy file to handbrake watch directory", (source,))
 		return
-	output_host = parse_dockerpath(cfg.mapping, output)
+	output_host = parse_dockerpath(cfg.mapping, output)[0]
 	if output_host == -1:
-		errmsg("Could not get the host path of file of mappings", (output, cfg.mapping))
+		errmsg("Could not get the host path of file", (output))
 	debugmsg("Copied file to handbrake watch directory", (source,))
 
 	## Write the convert file with all necessary information
@@ -82,7 +82,7 @@ def post_processing(args):
 	source_files = [files_find_ext(abs_path, ext) for ext in ["mkv", "mp4"]]
 	source_files = [i for sl in source_files for i in sl]
 	for source in source_files:
-		source_host = parse_dockerpath(cfg.mapping, source)
+		(source_host, root_host) = parse_dockerpath(cfg.mapping, source)
 		debugmsg("Add source file to SynoIndex database", (source_host,))
 		client(source_host)
 
