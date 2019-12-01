@@ -58,6 +58,7 @@ OPENVPN_PASSWORD                          | <password>                          
 1. Make your changes to the config-file. For example:
 	```
     [Mapping]
+    /docker = /volume1/docker
     /serien = /volume1/Serien
     /filme = /volume1/Filme
     /video = /volume1/video
