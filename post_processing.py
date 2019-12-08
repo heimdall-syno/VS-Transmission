@@ -12,6 +12,10 @@ from mediainfo import ffprobe_file
 from prints import errmsg, debugmsg
 from client import client
 
+## Redirect stdout and stderr for docker logs
+sys.stdout = open("/proc/self/fd/1", "w")
+sys.stderr = open("/proc/self/fd/2", "w")
+
 ## Parse the config
 config_file = os.path.join(cur_dir, "config.txt")
 cfg = parse_cfg(config_file, "vs-transmission", "docker")
