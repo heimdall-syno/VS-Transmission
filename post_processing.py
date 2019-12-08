@@ -9,12 +9,11 @@ from files import files_find_ext, file_copy, file_copy_args
 from files import directory_create_owner, unrar_files
 from parse import parse_cfg, parse_dockerpath
 from mediainfo import ffprobe_file
-from prints import errmsg, debugmsg
+from prints import errmsg, debugmsg, Logger
 from client import client
 
 ## Redirect stdout and stderr for docker logs
-sys.stdout = open("/proc/1/fd/1", "w")
-sys.stderr = open("/proc/1/fd/1", "w")
+sys.stdout, sys.stderr = (Logger() for _ in range(2))
 
 ## Parse the config
 config_file = os.path.join(cur_dir, "config.txt")
