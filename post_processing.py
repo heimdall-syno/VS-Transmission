@@ -44,14 +44,16 @@ def copy_file_to_handbrake(args, source, source_host, root_host):
 
 	## Copy the video file to the handbrake watch directory
 	watch_dir = os.path.join(cfg.handbrake, "watch")
-	output = file_copy(source, watch_dir, args)
-	if not output:
+	watch_file = file_copy(source, watch_dir, args)
+	if not watch_file:
 		errmsg("Could not copy file to handbrake watch directory", (source,))
 		return
-	output_host = parse_dockerpath(cfg.mapping, output)[0]
-	if output_host == -1:
-		errmsg("Could not get the host path of file", (output))
 	debugmsg("Copied file to handbrake watch directory", (source,))
+
+	output_file = os.path.join(cfg.handbrake, "output", os.path.basename(watch_file))
+	output_host = parse_dockerpath(cfg.mapping, output_file)[0]
+	if output_host == -1:
+		errmsg("Could not get the host path of file", (output_file))
 
 	## Write the convert file with all necessary information
 	write_convert_file(source, source_host, root_host, output_host)
