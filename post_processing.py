@@ -70,7 +70,7 @@ def fix_single_file(args):
 	abs_path = os.path.join(args.directory, args.name)
 	if os.path.isfile(abs_path):
 		new_dir = directory_create_owner(args)
-		abs_path = file_copy_args(new_dir, args)
+		abs_path = file_copy(abs_path, new_dir, args)
 		debugmsg("Fixed single video file into directory", (new_dir,))
 	return abs_path
 
