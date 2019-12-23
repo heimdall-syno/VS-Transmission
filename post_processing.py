@@ -9,11 +9,8 @@ from files import files_find_ext, file_copy, file_copy_args
 from files import directory_create_owner, unrar_files
 from parse import parse_cfg, parse_dockerpath
 from mediainfo import ffprobe_file
-from prints import errmsg, debugmsg, Logger
+from prints import errmsg, debugmsg, init_logging
 from client import client
-
-## Redirect stdout and stderr for docker logs
-sys.stdout, sys.stderr = (Logger() for _ in range(2))
 
 ## Parse the config
 config_file = os.path.join(cur_dir, "config.txt")
@@ -77,6 +74,9 @@ def fix_single_file(args):
 def post_processing(args):
 	''' Post processing '''
 
+	## Initialize the logging
+	init_logging()
+
 	## If torrent is a single file create a directory and copy that file
 	abs_path = fix_single_file(args)
 
@@ -88,7 +88,7 @@ def post_processing(args):
 	source_files = [i for sl in source_files for i in sl]
 	for source in source_files:
 		(source_host, root_host) = parse_dockerpath(cfg.mapping, source)
-		debugmsg("Add source file to SynoIndex database", (source_host,))
+		debugmsg("Add source file to SynoIndex database", (source_host.split(os.sep)[-1],))
 		client(source_host)
 
 	## If the video file is x264-based copy it to the watch directory of the handbrake
