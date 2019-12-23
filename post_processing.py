@@ -40,11 +40,12 @@ def copy_file_to_handbrake(args, source, source_host, root_host):
 
 	## Copy the video file to the handbrake watch directory
 	watch_dir = os.path.join(cfg.handbrake, "watch")
+	debugmsg("Copying file to handbrake watch directory", (source,))
 	watch_file = file_copy(source, watch_dir, args)
 	if not watch_file:
 		errmsg("Could not copy file to handbrake watch directory", (source,))
 		return
-	debugmsg("Copied file to handbrake watch directory", (source,))
+	debugmsg("Finished copying file", (source,))
 
 	output_file = os.path.join(cfg.handbrake, "output", os.path.basename(watch_file))
 	output_host = parse_dockerpath(cfg.mapping, output_file)[0]
