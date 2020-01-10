@@ -25,7 +25,7 @@ def write_convert_file(source, source_host, root_host, output_host):
 	## Write the convert file
 	convert_content = "root_host:%s\nsource_host:%s\noutput_host:%s" % (root_host, source_host, output_host)
 	with open(convert_file, 'w+') as f: f.write(convert_content)
-	debugmsg("Created convert file", (convert_file,))
+	debugmsg("Created convert file", "Postprocessing", (convert_file,))
 
 def copy_file_to_handbrake(args, source, source_host, root_host):
 	''' Copy file to the handbrake watch directory and change owner. '''
@@ -35,22 +35,27 @@ def copy_file_to_handbrake(args, source, source_host, root_host):
 
 	## Check whether it is one codec of the config is present
 	if codec not in cfg.codecs:
-		debugmsg("Codec is not watched in file", (codec, source_host))
+		debugmsg("Codec is not watched in file", "Postprocessing", (codec, source_host))
+		return
+
+	## FuN releases are good enough - handbrake isn't needed
+	if (source.split("-")[-1] == "FuN"):
+		debugmsg("FuN releases are good enough, the way they are", "Postprocessing", (codec, source_host))
 		return
 
 	## Copy the video file to the handbrake watch directory
 	watch_dir = os.path.join(cfg.handbrake, "watch")
-	debugmsg("Copying file to handbrake watch directory", (source,))
+	debugmsg("Copying file to handbrake watch directory", "Postprocessing", (source,))
 	watch_file = file_copy(source, watch_dir, args)
 	if not watch_file:
-		errmsg("Could not copy file to handbrake watch directory", (source,))
+		errmsg("Could not copy file to handbrake watch directory", "Postprocessing", (source,))
 		return
-	debugmsg("Finished copying file", (source,))
+	debugmsg("Finished copying file", "Postprocessing", (source,))
 
 	output_file = os.path.join(cfg.handbrake, "output", os.path.basename(watch_file))
 	output_host = parse_dockerpath(cfg.mapping, output_file)[0]
 	if output_host == -1:
-		errmsg("Could not get the host path of file", (output_file))
+		errmsg("Could not get the host path of file", "Postprocessing", (output_file))
 
 	## Write the convert file with all necessary information
 	write_convert_file(source, source_host, root_host, output_host)
@@ -69,7 +74,7 @@ def fix_single_file(args):
 	if os.path.isfile(abs_path):
 		new_dir = directory_create_owner(args)
 		abs_path = file_copy(abs_path, new_dir, args)
-		debugmsg("Fixed single video file into directory", (new_dir,))
+		debugmsg("Fixed single video file into directory", "Postprocessing", (new_dir,))
 	return abs_path
 
 def post_processing(args):
@@ -89,7 +94,7 @@ def post_processing(args):
 	source_files = [i for sl in source_files for i in sl]
 	for source in source_files:
 		(source_host, root_host) = parse_dockerpath(cfg.mapping, source)
-		debugmsg("Add source file to SynoIndex database", (source_host.split(os.sep)[-1],))
+		debugmsg("Add source file to SynoIndex database", "Postprocessing", (source_host.split(os.sep)[-1],))
 		client(source_host)
 
 	## If the video file is x264-based copy it to the watch directory of the handbrake
