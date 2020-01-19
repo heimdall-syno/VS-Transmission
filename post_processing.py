@@ -7,16 +7,24 @@ sys.path.append(os.path.join(cur_dir, "VS-Utils"))
 sys.path.append(os.path.join(cur_dir, "VS-SynoIndex"))
 from files import files_find_ext, file_copy, file_copy_args
 from files import directory_create_owner, unrar_files
-from parse import parse_cfg, parse_dockerpath
+from parse import parse_cfg_transmission, parse_dockerpath
 from mediainfo import ffprobe_file
 from prints import errmsg, debugmsg, init_logging
 from client import client
 
 ## Parse the config
-config_file = os.path.join(cur_dir, "config.txt")
-cfg = parse_cfg(config_file, "vs-transmission", "docker")
+codecs = ["x264", "h264", "x265", "h265", "hevc"]
+cfg = parse_cfg_transmission("docker", codecs)
 
 def write_convert_file(source, source_host, root_host, output_host):
+	""" Write the convert file to pass necessary filesystem information to handbrake.
+
+	Arguments:
+		source {string} 	 -- Path to the source within docker container.
+		source_host {string} -- Path to the source file on the host system.
+		root_host {string} 	 -- Path to the top mount containing the file.
+		output_host {[type]} -- Path to the output file of handbrake.
+	"""
 
 	## Create convert file path
 	convert_file = "%s.txt" % (".".join(os.path.basename(source).split(".")[:-1]))
@@ -28,19 +36,26 @@ def write_convert_file(source, source_host, root_host, output_host):
 	debugmsg("Created convert file", "Postprocessing", (convert_file,))
 
 def copy_file_to_handbrake(args, source, source_host, root_host):
-	''' Copy file to the handbrake watch directory and change owner. '''
+	""" Copy file to the handbrake watch directory and change owner.
+
+	Arguments:
+		args {Namespace} 	 -- Namespace containing all shell arguments
+		source {string} 	 -- Path to the source within docker container.
+		source_host {string} -- Path to the source file on the host system.
+		root_host {string} 	 -- Path to the top mount containing the file.
+	"""
 
 	## Get all media info about the file
 	codec = ffprobe_file(source)["video_codec"]
 
 	## Check whether it is one codec of the config is present
 	if codec not in cfg.codecs:
-		debugmsg("Codec is not watched in file", "Postprocessing", (codec, source_host))
+		debugmsg("Codec is not watched in file", "Postprocessing", (codec, source))
 		return
 
 	## FuN releases are good enough - handbrake isn't needed
 	if (source.split("-")[-1] == "FuN"):
-		debugmsg("FuN releases are good enough, the way they are", "Postprocessing", (codec, source_host))
+		debugmsg("FuN releases are good enough", "Postprocessing", (source,))
 		return
 
 	## Copy the video file to the handbrake watch directory
@@ -99,7 +114,7 @@ def post_processing(args):
 
 	## If the video file is x264-based copy it to the watch directory of the handbrake
 	## docker container
-	if (args.handbrake):
+	if (cfg.handbrake):
 		for source in source_files:
 			(source_host, root_host) = parse_dockerpath(cfg.mapping, source)
 			copy_file_to_handbrake(args, source, source_host, root_host)
@@ -113,7 +128,6 @@ def main():
 	parser.add_argument('-d','--directory', help='Directory of the torrent', required=True)
 	parser.add_argument('-u','--userid', help='ID of the user (PUID)', type=int, required=True)
 	parser.add_argument('-g','--groupid', help='ID of the group (PGID)', type=int, required=True)
-	parser.add_argument('-b','--handbrake', help='Pipe to handbrake', action='store_true', required=False)
 	args = parser.parse_args()
 
 	## Post Processing

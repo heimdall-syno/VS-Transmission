@@ -68,7 +68,7 @@ OPENVPN_PASSWORD                          | <password>                          
 
     [Handbrake]
     handbrake = /docker/handbrake
-    codecs = x264, h264
+    codecs = x264, h264, x265, h265, hevc
 	```
 
 2. Make sure that web.py module is supported by python:
