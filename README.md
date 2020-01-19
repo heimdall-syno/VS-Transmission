@@ -1,14 +1,23 @@
 #  VS-Transmission
 
-VS-Transmission enables adding video files (e.g. movies and series) directly to Synology's VideoStation from within the "docker-transmission-openvpn" container (https://github.com/haugene/docker-transmission-openvpn).
+VS-Transmission is an extension "docker-transmission-openvpn" container for adding video files (e.g. movies and series) directly to Synology's VideoStation from within the container (https://github.com/haugene/docker-transmission-openvpn).
 
-Optionally the files are converted by the handbrake docker container (https://github.com/jlesage/docker-handbrake).
+It is the first part of an automated toolchain which download, convert, rename and relocate video files for Synology's VideoStation.
+
+Check out the second part of the toolchain - called VS-handbrake (https://github.com/salsh/VS-Handbrake) - which performs the converting and renaming part.
 
 ## Quick Start
 
 1. Configure the transmission-openvpn docker container as shown below (Container configuration). In the example configuration the transmission container is located at /docker/transmission and the handbrake container at /docker/handbrake. If the files should be converted by handbrake after the download finished then add an mount pointing to the root container directory.
 
-2. Make sure the container is up and running. If so install all dependencies:
+2. Make sure the task (task planer) for the /dev/net/tun device is configured:
+	```
+    Task:       Docker-Transmission
+    User:       root
+    Command:    bash /volume1/docker/transmission/openvpn_scripts/TUN.sh
+    ```
+
+2. If the container is well configured, up and running then install all dependencies:
     ```
     $ sudo ./autogen.sh
     ```
