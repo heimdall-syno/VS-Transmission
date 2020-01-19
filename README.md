@@ -8,28 +8,30 @@ Check out the second part of the toolchain - called VS-handbrake (https://github
 
 ## Quick Start
 
-1. Configure the transmission-openvpn docker container as shown below (Container configuration). In the example configuration the transmission container is located at /docker/transmission and the handbrake container at /docker/handbrake. If the files should be converted by handbrake after the download finished then add an mount pointing to the root container directory.
+1. Clone the repository inside the root directory of the transmission-openvpn docker container.
 
-2. Make sure the task (task planer) for the /dev/net/tun device is configured:
+2. Configure the transmission-openvpn docker container as shown below (Container configuration). In the example configuration the transmission container is located at /docker/transmission and the handbrake container at /docker/handbrake. If the files should be converted by handbrake after the download finished then add an mount pointing to the root container directory.
+
+3. Make sure the task (task planer) for the /dev/net/tun device is configured:
 	```
     Task:       Docker-Transmission
     User:       root
     Command:    bash /volume1/docker/transmission/openvpn_scripts/TUN.sh
     ```
 
-2. If the container is well configured, up and running then install all dependencies:
+4. If the container is well configured, up and running then install all dependencies:
     ```
     $ sudo ./autogen.sh
     ```
 
-3. Create a task (task planer) for the web-service with the following settings:
+5. Create a task (task planer) for the web-service with the following settings:
 	```
     Task:       SynoIndex-Webserver
     User:       <username> (not root)
     Command:    python3 /volume1/docker/transmission/vs-transmission/VS-SynoIndex/webservice.py
     ```
 
-4. If handbrake is enabled then make sure the docker container is up and running.
+Optional: If handbrake is enabled then make sure the docker container is up and running.
 
 ----
 #### Container configuration
