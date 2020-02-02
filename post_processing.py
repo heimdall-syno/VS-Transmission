@@ -16,20 +16,20 @@ from client import client
 codecs = ["x264", "h264", "x265", "h265", "hevc"]
 cfg = parse_cfg_transmission("docker", codecs)
 
-def write_changelog_file(source_host, root_host):
+def write_changelog_file(source, source_host, root_host):
 	""" Write the changelog file to pass the new releases for the notification service.
 
 	Arguments:
-		source_host {string} -- Path to the source file on the host system.
+		source {string} 	 -- Path to the source within docker container.
 		root_host {string} 	 -- Path to the top mount containing the file.
 	"""
 
 	## Create changelog file path
-	changelog_file = os.path.join(root_host, "changelog.txt")
+	changelog_file = os.path.join(os.sep, source.split(os.sep)[1], "changelog.txt")
 
 	## Write the convert file
-	changelog_content = "{}\n" % (source_host)
-	with open(changelog_file, 'a+') as f: f.write(changelog_content)
+	changelog_content = "{}\n".format(source_host)
+	with open(changelog_file, 'a') as f: f.write(changelog_content)
 	debugmsg("Created changelog file", "Postprocessing", (changelog_file,))
 
 def write_convert_file(source, source_host, root_host, output_host):
@@ -129,7 +129,7 @@ def post_processing(args):
 		client(source_host)
 
 	## Write changelog file for notification service
-	write_changelog_file(source_host, root_host)
+	write_changelog_file(source, source_host, root_host)
 
 	## If the video file is x264-based copy it to the watch directory of the handbrake
 	## docker container
