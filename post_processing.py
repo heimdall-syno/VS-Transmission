@@ -28,9 +28,18 @@ def write_changelog_file(source, source_host, root_host):
 	changelog_file = os.path.join(os.sep, source.split(os.sep)[1], "changelog.txt")
 
 	## Write the convert file
-	changelog_content = "{}\n".format(source_host)
+	date = datetime.strftime(datetime.now(), "%Y-%m-%d")
+	changelog_content = "{date},{source}\n".format(date=date, source=source_host)
+	if os.path.isfile(changelog_file):
+		with open(changelog_file, 'r') as f: lines = f.readlines()
+		dupl = [l for l in lines if l.split(",")[0] == date and l.split(",")[1] == source_host]
+		if (dupl):
+			debugmsg("Item already exist in changelog file, skip it", "Postprocessing", (changelog_file,))
+			return
+		debugmsg("Add item to changelog file", "Postprocessing", (changelog_file,))
+	else:
+		debugmsg("Create changelog file and add item", "Postprocessing", (changelog_file,))
 	with open(changelog_file, 'a') as f: f.write(changelog_content)
-	debugmsg("Created changelog file", "Postprocessing", (changelog_file,))
 
 def write_convert_file(source, source_host, root_host, output_host):
 	""" Write the convert file to pass necessary filesystem information to handbrake.
