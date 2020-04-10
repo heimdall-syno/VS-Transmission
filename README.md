@@ -4,11 +4,11 @@ VS-Transmission is an extension "docker-transmission-openvpn" container for addi
 
 It is the first part of an automated toolchain which download, convert, rename and relocate video files for Synology's VideoStation.
 
-Check out the second part of the toolchain - called VS-handbrake (https://github.com/heimdall-syno/VS-Handbrake) - which performs the converting and renaming part.
+Check out the second part of the toolchain - VS-Handbrake (https://github.com/heimdall-syno/VS-Handbrake) - which performs the conversion and renaming.
 
 ## Quick Start
 
-1. Clone the repository inside the root directory of the transmission-openvpn docker container.
+1. Clone the repository inside the root directory of the transmission-openvpn docker container e.g. "/volume1/docker/transmission".
 
 2. Configure the transmission-openvpn docker container as shown below (Container configuration). In the example configuration the transmission container is located at /docker/transmission and the handbrake container at /docker/handbrake. If the files should be converted by handbrake after the download finished then add an mount pointing to the root container directory.
 
