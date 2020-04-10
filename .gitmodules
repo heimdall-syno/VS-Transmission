@@ -1,6 +1,6 @@
 [submodule "VS-Utils"]
 	path = VS-Utils
-	url = https://github.com/salsh/VS-Utils
+	url = https://github.com/heimdall-syno/VS-Utils
 [submodule "VS-SynoIndex"]
 	path = VS-SynoIndex
-	url = https://github.com/salsh/VS-SynoIndex
+	url = https://github.com/heimdall-syno/VS-SynoIndex
