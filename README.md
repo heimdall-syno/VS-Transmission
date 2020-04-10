@@ -4,7 +4,7 @@ VS-Transmission is an extension "docker-transmission-openvpn" container for addi
 
 It is the first part of an automated toolchain which download, convert, rename and relocate video files for Synology's VideoStation.
 
-Check out the second part of the toolchain - called VS-handbrake (https://github.com/salsh/VS-Handbrake) - which performs the converting and renaming part.
+Check out the second part of the toolchain - called VS-handbrake (https://github.com/heimdall-syno/VS-Handbrake) - which performs the converting and renaming part.
 
 ## Quick Start
 
@@ -26,7 +26,7 @@ Check out the second part of the toolchain - called VS-handbrake (https://github
 
 5. Create a task (task planer) for the web-service with the following settings:
 	```
-    Task:       SynoIndex-Webserver
+    Task:       VS-SynoIndex
     User:       <username> (not root)
     Command:    python3 /volume1/docker/transmission/vs-transmission/VS-SynoIndex/webservice.py
     ```
