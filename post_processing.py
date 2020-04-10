@@ -4,7 +4,7 @@ from datetime import datetime
 ## Add modules from the submodule (vs-utils)
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(cur_dir, "VS-Utils"))
-sys.path.append(os.path.join(cur_dir, "VS-SynoIndex"))
+sys.path.append(os.path.join(cur_dir, "VS-SynoIndex", "scripts"))
 from files import files_find_ext, file_copy, file_copy_args
 from files import directory_create_owner, unrar_files
 from parse import parse_cfg_transmission, parse_dockerpath
