@@ -24,12 +24,14 @@ Check out the second part of the toolchain - VS-Handbrake (https://github.com/he
     $ sudo ./autogen.sh
     ```
 
-5. Create a task (task planer) for the web-service with the following settings:
+5. Create a task (task planer) for the Syno-Index server with the following settings:
 	```
     Task:       VS-SynoIndex
     User:       <username> (not root)
-    Command:    python3 /volume1/docker/transmission/vs-transmission/VS-SynoIndex/webservice.py
+    Command:    python3 /volume1/homes/user/VS-SynoIndex/webservice.py -d 32699 -l /volume1/docker/logs
     ```
+
+6. Edit the port number of the Syno-Index server in post_processing.sh
 
 Optional: If handbrake is enabled then make sure the docker container is up and running.
 

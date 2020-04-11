@@ -4,12 +4,11 @@ from datetime import datetime
 ## Add modules from the submodule (vs-utils)
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(cur_dir, "VS-Utils"))
-sys.path.append(os.path.join(cur_dir, "VS-SynoIndex", "scripts"))
 from files import files_find_ext, file_copy, file_copy_args
 from files import directory_create_owner, unrar_files
 from parse import parse_cfg_transmission, parse_dockerpath
-from mediainfo import ffprobe_file
 from prints import errmsg, debugmsg, init_logging
+from mediainfo import ffprobe_file
 from client import client
 
 ## Parse the config
@@ -135,7 +134,7 @@ def post_processing(args):
 	for source in source_files:
 		(source_host, root_host) = parse_dockerpath(cfg.mapping, source)
 		debugmsg("Add source file to SynoIndex database", "Postprocessing", (source_host.split(os.sep)[-1],))
-		client(source_host)
+		client(source_host, args.port)
 
 	## Write changelog file for notification service
 	write_changelog_file(source, source_host, root_host)
@@ -156,6 +155,7 @@ def main():
 	parser.add_argument('-d','--directory', help='Directory of the torrent', required=True)
 	parser.add_argument('-u','--userid', help='ID of the user (PUID)', type=int, required=True)
 	parser.add_argument('-g','--groupid', help='ID of the group (PGID)', type=int, required=True)
+	parser.add_argument('-p','--port', help='Syno-Index server port', type=int, required=True)
 	args = parser.parse_args()
 
 	## Post Processing
