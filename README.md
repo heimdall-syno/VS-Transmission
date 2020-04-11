@@ -6,13 +6,42 @@ It is the first part of an automated toolchain which download, convert, rename a
 
 Check out the second part of the toolchain - VS-Handbrake (https://github.com/heimdall-syno/VS-Handbrake) - which performs the conversion and renaming.
 
+## Overview of the VS-Components
+```
+             +---------------------------------------------------------------------------------+
+             |                                  Synology DSM                                   |
+             +---------------------------------------------------------------------------------+
+             |                  +--------------------+  +-----------------+                    |
+             |                  |       Docker       |  |      Docker     |                    |
+             |                  |transmission.openVpn|  |     Handbrake   |                    |
+             |                  +--------------------+  +-----------------+                    |
+             | +------------+   | +---------------+  |  | +-------------+ |  +---------------+ |
+             | |VS-SynoIndex|   | |VS-Transmission|  |  | | VS-Handbrake| |  |VS-Notification| |
+             | |   (Task)   +---->+   (Script)    +------>+   (Script)  +--->+    (Task)     | |
+             | +------------+   | +---------------+  |  | +-------------+ |  +---------------+ |
+             |                  +--------------------+  +-----------------+                    |
+             |                                                                                 |
+             +---------------------------------------------------------------------------------+
+```
+
+Check out the other components:
+
+
+VS-SynoIndex:      https://github.com/heimdall-syno/VS-SynoIndex
+
+VS-Handbrake:      https://github.com/heimdall-syno/VS-Handbrake
+
+VS-Notification:   https://github.com/heimdall-syno/VS-Notification
+
+VS-Playlist-Share: https://github.com/heimdall-syno/VS-Playlist-Share
+
 ## Quick Start
 
 1. Clone the repository inside the root directory of the transmission-openvpn docker container e.g. "/volume1/docker/transmission".
 
 2. Configure the transmission-openvpn docker container as shown below (Container configuration). In the example configuration the transmission container is located at /docker/transmission and the handbrake container at /docker/handbrake. If the files should be converted by handbrake after the download finished then add an mount pointing to the root container directory.
 
-3. Make sure the task (task planer) for the /dev/net/tun device is configured:
+3. Make sure the Triggered task (Control Panel > Task Scheduler) for the /dev/net/tun device is configured:
 	```
     Task:       Docker-Transmission
     User:       root
@@ -24,19 +53,15 @@ Check out the second part of the toolchain - VS-Handbrake (https://github.com/he
     $ sudo ./autogen.sh
     ```
 
-5. Create a task (task planer) for the Syno-Index server with the following settings:
-	```
-    Task:       VS-SynoIndex
-    User:       <username> (not root)
-    Command:    python3 /volume1/homes/user/VS-SynoIndex/webservice.py -d 32699 -l /volume1/docker/logs
-    ```
+5. Setup VS-SynoIndex as described in the corresponding README (Clone & Triggered Task).
 
-6. Edit the port number of the Syno-Index server in post_processing.sh
+6. Edit the port number of the Syno-Index server in `post_processing.sh` according to the parameter in the triggered task.
 
-Optional: If handbrake is enabled then make sure the docker container is up and running.
+7. _Optional: Setup VS-Handbrake as described in the corresponding README._
 
-----
-#### Container configuration
+8. _Optional: Setup VS-Notification as described in the corresponding README._
+
+## Container configuration
 
 Port settings:
 ```
