@@ -30,8 +30,8 @@ def scope_map_docker_path(mapping, filepath):
     for m in mapping:
             file_tmp = filepath.replace(m[0], m[1])
             if file_tmp != filepath:
-                (source_host, root_host) = (file_tmp, m[1])
-    return (source_host, root_host)
+                (source_host, root_host, root) = (file_tmp, m[1], m[0])
+    return (source_host, root_host, root)
 
 def scope_map_path(cfg, args, filepath):
     """ Map docker path to host system path if necessary. If the scope
@@ -49,33 +49,33 @@ def scope_map_path(cfg, args, filepath):
 
     ## Map docker path to host system path
     if (args.scope == "docker"):
-        (source_host, root_host) = scope_map_docker_path(cfg.mapping, filepath)
+        return scope_map_docker_path(cfg.mapping, filepath)
 
     ## If script runs under host system then use the watch directories
     else:
         (source_host, root_host) = [(filepath, d) for d in cfg.watch_directories if d in filepath][0]
-    return (source_host, root_host)
+        return (source_host, root_host, root_host)
 
 def scope_get():
     ''' Get the scope of the script (within docker container or host system) '''
 
-    cgroup_path = os.path.join("proc", "1" , "cgroup")
+    cgroup_path = os.path.join(os.sep, "proc", "1" , "cgroup")
     with open(cgroup_path, 'r') as f: groups = f.readlines()
     groups = list(set([g.split(":")[-1] for g in groups]))
     if (len(groups) == 1 and groups[0] == os.sep):
         return "host"
     return "docker"
 
-def write_changelog_file(source, source_host, root_host):
+def write_changelog_file(source, source_host, root):
     """ Write the changelog file to pass the new releases for the notification service.
 
     Arguments:
         source {string}      -- Path to the source within docker container.
-        root_host {string}      -- Path to the top mount containing the file.
+        root {string}        -- Path to the top mount containing the file.
     """
 
     ## Create changelog file path
-    changelog_file = os.path.join(root_host, "changelog.txt")
+    changelog_file = os.path.join(root, "changelog.txt")
 
     ## Write the convert file
     date = datetime.strftime(datetime.now(), "%Y-%m-%d")
@@ -177,7 +177,7 @@ def post_processing(args):
     cfg = parse_cfg(config_file, "vs-transmission", args.scope)
 
     ## Initialize the logging
-    init_logging(cfg, args)
+    init_logging(args)
 
     ## If torrent is a single file create a directory and copy that file
     abs_path = fix_single_file(args)
@@ -186,20 +186,20 @@ def post_processing(args):
     unrar_files(abs_path)
 
     ## Import all non-compressed video files
-    source_files = [files_find_ext(abs_path, ext) for ext in args.extensions]
+    source_files = [files_find_ext(abs_path, ext) for ext in cfg.extensions]
     source_files = [i for sl in source_files for i in sl]
     for source in source_files:
-        (source_host, root_host) = scope_map_path(cfg, args, source)
+        (source_host, root_host, root) = scope_map_path(cfg, args, source)
         debugmsg("Add source file to SynoIndex database", "Postprocessing", (source_host.split(os.sep)[-1],))
-        client(source_host, args.port)
+        client(source_host, cfg.synoindex_port)
 
     ## Write changelog file for notification service
-    write_changelog_file(source, source_host, root_host)
+    write_changelog_file(source, source_host, root)
 
     ## Copy video file to handbrake if it's configured
     if (cfg.handbrake):
         for source in source_files:
-            (source_host, root_host) = scope_map_path(cfg, args, source)
+            (source_host, root_host, _) = scope_map_path(cfg, args, source)
             copy_file_to_handbrake(args, cfg, source, source_host, root_host)
 
 def main():

@@ -1,0 +1,29 @@
+
+## Transmission post processing settings. The settings specify
+## which file extensions and codecs of downloaded files are
+## watched and indexed accordingly.
+[Transmission]
+codecs     = x264, h264, x265, h265, hevc
+extensions = mkv, mp4
+
+
+## Settings related to the VS-SynoIndex server
+[SynoIndex]
+synoindex_port = 32699
+
+## Hostsystem related settings are necessary if the VS-Transmission script
+## should run directly within the Synology DSM host system. For example if
+## Transmission is installed in DSM or Synology Download-Station is used for
+## downloading. If the VS-Transmission is intended to run within a docker
+## container then the settings are ignored.
+##
+## Settings:
+## - The handbrake setting specifies the path to the root handbrake directory.
+## - The exclude setting allows to ignore files with a specific string in
+##     the file path. For example: FuN releases are already x265 encoded.
+## - The watch directories defines which directory are watched by the script
+##     in case that a downloaded file is located there.
+[Hostsystem]
+handbrake         = /volume1/docker/handbrake
+handbrake_exclude = FuN
+watch_directories = "/volume1/Filme, /volume1/Serien, /volume1/Dokus, /volume1/Anime, /volume1/video"
