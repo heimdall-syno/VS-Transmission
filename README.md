@@ -6,7 +6,7 @@ It is the first part of an automated toolchain which download, convert, rename a
 
 Check out the second part of the toolchain - VS-Handbrake (https://github.com/heimdall-syno/VS-Handbrake) - which performs the conversion and renaming.
 
-## Overview of the VS-Components
++## Overview of the VS-Components
 ```
              +---------------------------------------------------------------------------------+
              |                                  Synology DSM                                   |
@@ -41,7 +41,7 @@ VS-Playlist-Share: https://github.com/heimdall-syno/VS-Playlist-Share
 
 2. Configure the transmission-openvpn docker container as shown below (Container configuration). In the example configuration the transmission container is located at /docker/transmission and the handbrake container at /docker/handbrake. If the files should be converted by handbrake after the download finished then add an mount pointing to the root container directory.
 
-3. Make sure the Triggered task (Control Panel > Task Scheduler) for the /dev/net/tun device is configured:
+3. 3. Make sure the Triggered task (Control Panel > Task Scheduler) for the /dev/net/tun device is configured:
 	```
     Task:       Docker-Transmission
     User:       root
@@ -55,11 +55,9 @@ VS-Playlist-Share: https://github.com/heimdall-syno/VS-Playlist-Share
 
 5. Setup VS-SynoIndex as described in the corresponding README (Clone & Triggered Task).
 
-6. Edit the port number of the Syno-Index server in `post_processing.sh` according to the parameter in the triggered task.
+6. _Optional: Setup VS-Handbrake as described in the corresponding README._
 
-7. _Optional: Setup VS-Handbrake as described in the corresponding README._
-
-8. _Optional: Setup VS-Notification as described in the corresponding README._
+7. _Optional: Setup VS-Notification as described in the corresponding README._
 
 ## Container configuration
 
