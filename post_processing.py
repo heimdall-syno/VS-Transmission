@@ -126,12 +126,12 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
 
     ## Check whether it is one codec of the config is present
     if codec not in cfg.codecs:
-        debugmsg("Codec is not watched in file", "Postprocessing", (codec, source))
+        debugmsg("Codec is not watched in file", "Postprocessing", (source, codec))
         return
 
-    ## FuN releases are good enough - handbrake isn't needed
-    if any(excl in source for excl in cfg.handbrake_exclude):
-        debugmsg("Source file excluded due to config", "Postprocessing", (source,))
+    ## Only copy files which match no exclude string
+    if any(exclude in source for exclude in cfg.exclude):
+        debugmsg("Source file excluded by config", "Postprocessing", (source))
         return
 
     ## Copy the video file to the handbrake watch directory
@@ -153,14 +153,7 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
     write_convert_file(cfg, source, source_host, root_host, output_host)
 
 def fix_single_file(args):
-    """ If a single video file was downloaded create a directory and copy the file
-
-    Arguments:
-        args {Namespace} -- Namespace containing all shell arguments
-
-    Returns:
-        string -- Path of the copied file.
-    """
+    """ If a single video file was downloaded create a directory and copy the file """
 
     abs_path = os.path.join(args.directory, args.name)
     if os.path.isfile(abs_path):
@@ -191,7 +184,7 @@ def post_processing(args):
     for source in source_files:
         (source_host, root_host, root) = scope_map_path(cfg, args, source)
         debugmsg("Add source file to SynoIndex database", "Postprocessing", (source_host.split(os.sep)[-1],))
-        client(source_host, cfg.synoindex_port)
+        client(source_host, cfg.port, None, 0, args.scope)
 
     ## Write changelog file for notification service
     write_changelog_file(source, source_host, root)

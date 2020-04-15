@@ -1,29 +1,37 @@
 
-## Transmission post processing settings. The settings specify
-## which file extensions and codecs of downloaded files are
-## watched and indexed accordingly.
 [Transmission]
+## Transmission post processing settings. The settings specify which file
+## extensions and codecs of downloaded source files are watched and indexed.
+## codecs: List of codecs (strings) divided by commas.
 codecs     = x264, h264, x265, h265, hevc
+
+## extensions: list of Extensions (strings) divided by commas.
 extensions = mkv, mp4
 
-
-## Settings related to the VS-SynoIndex server
 [SynoIndex]
-synoindex_port = 32699
+## Settings defining the communication with the SynoIndex server.
+## synoindex_port: Port of the Syno Index server running as DSM Task.
+synoindex_port     = 32699
 
+[Host]
 ## Hostsystem related settings are necessary if the VS-Transmission script
 ## should run directly within the Synology DSM host system. For example if
-## Transmission is installed in DSM or Synology Download-Station is used for
-## downloading. If the VS-Transmission is intended to run within a docker
-## container then the settings are ignored.
-##
-## Settings:
-## - The handbrake setting specifies the path to the root handbrake directory.
-## - The exclude setting allows to ignore files with a specific string in
-##     the file path. For example: FuN releases are already x265 encoded.
-## - The watch directories defines which directory are watched by the script
-##     in case that a downloaded file is located there.
-[Hostsystem]
-handbrake         = /volume1/docker/handbrake
+## Transmission is installed in DSM or Synology's Download-Station is used
+## for downloading files. If the VS-Transmission is intended to run within
+## a docker container then the settings are ignored.
+## host_handbrake:
+##      Specify the path to the root handbrake directory.
+host_handbrake  = /volume1/docker/handbrake
+
+## host_watch_dir:
+##      Define directories watched by the script after a download is finished.
+##      It is a list of strings divided by commas.
+host_watch_dir  = /volume1/Filme, /volume1/Serien, /volume1/Dokus, /volume1/Anime, /volume1/video, /volume1/test 123/test
+
+[Handbrake]
+## Settings which specify which files are converted and whether the original
+## source file is untouched or deleted.
+## handbrake_exclude:
+##      Ignore source files for converting with handbrake on basis of strings
+##      in the filename. It is a list of strings divided by commas.
 handbrake_exclude = FuN
-watch_directories = "/volume1/Filme, /volume1/Serien, /volume1/Dokus, /volume1/Anime, /volume1/video"
