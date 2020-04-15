@@ -184,7 +184,7 @@ def post_processing(args):
     for source in source_files:
         (source_host, root_host, root) = scope_map_path(cfg, args, source)
         debugmsg("Add source file to SynoIndex database", "Postprocessing", (source_host.split(os.sep)[-1],))
-        client(source_host, cfg.port, None, 0, args.scope)
+        client(args.scope, cfg.port, source_host, "", "0")
 
     ## Write changelog file for notification service
     write_changelog_file(source, source_host, root)
