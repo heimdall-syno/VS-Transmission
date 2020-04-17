@@ -179,8 +179,7 @@ def post_processing(args):
     unrar_files(abs_path)
 
     ## Import all non-compressed video files
-    source_files = [files_find_ext(abs_path, ext) for ext in cfg.extensions]
-    source_files = [i for sl in source_files for i in sl]
+    source_files = files_find_ext(abs_path, cfg.extensions)
     for source in source_files:
         (source_host, root_host, root) = scope_map_path(cfg, args, source)
         debugmsg("Add source file to SynoIndex database", "Postprocessing", (source_host.split(os.sep)[-1],))

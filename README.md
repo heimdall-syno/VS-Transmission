@@ -55,9 +55,11 @@ VS-Playlist-Share: https://github.com/heimdall-syno/VS-Playlist-Share
 
 5. Setup VS-SynoIndex as described in the corresponding README (Clone & Triggered Task).
 
-6. _Optional: Setup VS-Handbrake as described in the corresponding README._
+6. Configure VS-Transmission by editing the config.txt as described in the corresponding description.
 
-7. _Optional: Setup VS-Notification as described in the corresponding README._
+7. _Optional: Setup VS-Handbrake as described in the corresponding README._
+
+8. _Optional: Setup VS-Notification as described in the corresponding README._
 
 ## Container configuration
 
@@ -97,7 +99,7 @@ Variable                                    Value                               
 ------------------------------------------+--------------------------------------------+------------------
 TRANSMISSION_INCOMPLETE_DIR               | /filme                                     | overwritten by GUI
 TRANSMISSION_PEER_PORT                    | 54754                                      | overwritten random
-TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME | /data/vs-transmission/post_processing.sh   | Fix
+TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME | /data/VS-Transmission/post_processing.sh   | Fix
 TRANSMISSION_HOME                         | /data/transmission-home                    | Fix
 LOCAL_NETWORK                             | 192.168.178.0/24                           | Fix
 OPENVPN_USERNAME                          | <username>                                 | Fix
