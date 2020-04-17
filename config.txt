@@ -35,3 +35,10 @@ host_watch_dir  = /volume1/Filme, /volume1/Serien, /volume1/Dokus, /volume1/Anim
 ##      Ignore source files for converting with handbrake on basis of strings
 ##      in the filename. It is a list of strings divided by commas.
 handbrake_exclude = FuN
+
+[Logging]
+## log_level:
+##  DEBUG   - Detailed information, typically of interest only when diagnosing problems.
+##  INFO    - Confirmation that things are working as expected.
+##  ERROR   - Due to a more serious problem, the software has not been able to perform some function.
+log_level = DEBUG

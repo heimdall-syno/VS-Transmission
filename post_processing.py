@@ -6,7 +6,7 @@ cur_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(cur_dir, "VS-Utils"))
 from files import files_find_ext, file_copy, file_copy_args
 from files import directory_create_owner, unrar_files
-from prints import errmsg, debugmsg, init_logging
+from prints import errmsg, debugmsg, infomsg, init_logging
 from mediainfo import ffprobe_file
 from parse import parse_cfg
 from client import client
@@ -126,22 +126,22 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
 
     ## Check whether it is one codec of the config is present
     if codec not in cfg.codecs:
-        debugmsg("Codec is not watched in file", "Postprocessing", (source, codec))
+        infomsg("Codec is not watched in file", "Postprocessing", (source, codec))
         return
 
     ## Only copy files which match no exclude string
     if any(exclude in source for exclude in cfg.exclude):
-        debugmsg("Source file excluded by config", "Postprocessing", (source))
+        infomsg("Source file excluded by config", "Postprocessing", (source))
         return
 
     ## Copy the video file to the handbrake watch directory
     watch_dir = os.path.join(cfg.handbrake, "watch")
-    debugmsg("Copying file to handbrake watch directory", "Postprocessing", (source,))
+    infomsg("Copying file to handbrake watch directory", "Postprocessing", (source,))
     watch_file = file_copy(source, watch_dir, args)
     if not watch_file:
         errmsg("Could not copy file to handbrake watch directory", "Postprocessing", (source,))
         return
-    debugmsg("Finished copying file", "Postprocessing", (source,))
+    infomsg("Finished copying file", "Postprocessing", (source,))
 
     output_file = os.path.join(cfg.handbrake, "output", os.path.basename(watch_file))
     output_host = scope_map_path(cfg,args, output_file)[0]
@@ -170,7 +170,7 @@ def post_processing(args):
     cfg = parse_cfg(config_file, "vs-transmission", args.scope)
 
     ## Initialize the logging
-    init_logging(args)
+    init_logging(args, cfg)
 
     ## If torrent is a single file create a directory and copy that file
     abs_path = fix_single_file(args)
@@ -182,7 +182,7 @@ def post_processing(args):
     source_files = files_find_ext(abs_path, cfg.extensions)
     for source in source_files:
         (source_host, root_host, root) = scope_map_path(cfg, args, source)
-        debugmsg("Add source file to SynoIndex database", "Postprocessing", (source_host.split(os.sep)[-1],))
+        infomsg("Add source file to SynoIndex database", "Postprocessing", (source_host.split(os.sep)[-1],))
         client(args.scope, cfg.port, source_host)
 
     ## Write changelog file for notification service
