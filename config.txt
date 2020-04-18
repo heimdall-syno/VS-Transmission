@@ -38,7 +38,7 @@ handbrake_exclude = FuN
 
 [Logging]
 ## log_level:
-##  DEBUG   - Detailed information, typically of interest only when diagnosing problems.
-##  INFO    - Confirmation that things are working as expected.
-##  ERROR   - Due to a more serious problem, the software has not been able to perform some function.
-log_level = DEBUG
+##  10 - (DEBUG) Detailed information, typically of interest only when diagnosing problems.
+##  20 - (INFO)  Confirmation that things are working as expected.
+##  40 - (ERROR) Due to a more serious problem, the software has not been able to perform some function.
+log_level = 10
