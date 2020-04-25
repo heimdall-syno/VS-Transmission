@@ -1,44 +1,66 @@
+###############################################################################
+##                     Config file for the VS-Transmission                   ##
+###############################################################################
 
+###############################################################################
 [Transmission]
-## Transmission post processing settings. The settings specify which file
+###############################################################################
+## Transmission post-processing settings. The settings specify which file
 ## extensions and codecs of downloaded source files are watched and indexed.
-## codecs: List of codecs (strings) divided by commas.
-codecs     = x264, h264, x265, h265, hevc
 
-## extensions: list of Extensions (strings) divided by commas.
+## List of codecs (strings) divided by commas.
+codecs = x264, h264, x265, h265, hevc
+
+## List of extensions (strings) divided by commas.
 extensions = mkv, mp4
 
+###############################################################################
 [SynoIndex]
+###############################################################################
 ## Settings defining the communication with the SynoIndex server.
-## synoindex_port: Port of the Syno Index server running as DSM Task.
-synoindex_port     = 32699
 
+## Port of the Syno Index server running as DSM Task.
+synoindex_port = 32699
+
+###############################################################################
 [Host]
+###############################################################################
 ## Hostsystem related settings are necessary if the VS-Transmission script
 ## should run directly within the Synology DSM host system. For example if
 ## Transmission is installed in DSM or Synology's Download-Station is used
 ## for downloading files. If the VS-Transmission is intended to run within
 ## a docker container then the settings are ignored.
-## host_handbrake:
-##      Specify the path to the root handbrake directory.
-host_handbrake  = /volume1/docker/handbrake
 
-## host_watch_dir:
-##      Define directories watched by the script after a download is finished.
-##      It is a list of strings divided by commas.
-host_watch_dir  = /volume1/Filme, /volume1/Serien, /volume1/Dokus, /volume1/Anime, /volume1/video, /volume1/test 123/test
+## Specify the path to the root handbrake directory.
+host_handbrake = /volume1/docker/handbrake
 
+## Define directories watched by the script after a download is finished.
+## It is a list of strings divided by commas.
+host_watch_dir = /volume1/Filme, /volume1/Serien, /volume1/Dokus, /volume1/Anime, /volume1/video
+
+## Define the admin which own new directories and files (e.g. "admin").
+host_admin = alshesa
+
+###############################################################################
 [Handbrake]
+###############################################################################
 ## Settings which specify which files are converted and whether the original
 ## source file is untouched or deleted.
-## handbrake_exclude:
-##      Ignore source files for converting with handbrake on basis of strings
-##      in the filename. It is a list of strings divided by commas.
+
+## Ignore source files for converting with handbrake on basis of strings
+## in the filename. It is a list of strings divided by commas.
 handbrake_exclude = FuN
 
+###############################################################################
 [Logging]
-## log_level:
-##  10 - (DEBUG) Detailed information, typically of interest only when diagnosing problems.
-##  20 - (INFO)  Confirmation that things are working as expected.
-##  40 - (ERROR) Due to a more serious problem, the software has not been able to perform some function.
+###############################################################################
+## Settings for the logging.
+
+## Log level used in the stdout and log file:
+##   10 - (DEBUG) Detailed information, only when diagnosing problems.
+##   20 - (INFO)  Confirmation that things are working as expected.
+##   40 - (ERROR) The software has not been able to perform some function.
 log_level = 10
+
+## Path to the log directory.
+log_dir = /volume1/docker/logs

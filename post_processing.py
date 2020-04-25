@@ -53,7 +53,10 @@ def scope_map_path(cfg, args, filepath):
 
     ## If script runs under host system then use the watch directories
     else:
-        (source_host, root_host) = [(filepath, d) for d in cfg.watch_directories if d in filepath][0]
+        watch_dirs = cfg.watch_directories + [cfg.handbrake]
+        maps = [(filepath, d) for d in watch_dirs if d in filepath]
+        if not maps: return -1
+        (source_host, root_host) = maps[0]
         return (source_host, root_host, root_host)
 
 def scope_get():
@@ -61,7 +64,7 @@ def scope_get():
 
     cgroup_path = os.path.join(os.sep, "proc", "1" , "cgroup")
     with open(cgroup_path, 'r') as f: groups = f.readlines()
-    groups = list(set([g.split(":")[-1] for g in groups]))
+    groups = list(set([g.replace("\n","").split(":")[-1] for g in groups]))
     if (len(groups) == 1 and groups[0] == os.sep):
         return "host"
     return "docker"
@@ -144,7 +147,7 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
     infomsg("Finished copying file", "Postprocessing", (source,))
 
     output_file = os.path.join(cfg.handbrake, "output", os.path.basename(watch_file))
-    output_host = scope_map_path(cfg,args, output_file)[0]
+    output_host = scope_map_path(cfg, args, output_file)[0]
     if output_host == -1:
         errmsg("Could not get the host path of file", "Postprocessing", (output_file))
         return
@@ -162,12 +165,28 @@ def fix_single_file(args):
         debugmsg("Fixed single video file into directory", "Postprocessing", (new_dir,))
     return abs_path
 
-def post_processing(args):
-    ''' Post processing '''
+def parse_arguments():
+    ## Parse the shell arguments
+    args = argparse.Namespace()
+    parser = argparse.ArgumentParser(description='Post Processing of torrents via transmission')
+    parser.add_argument('-n','--name', help='Name of the torrent', required=True)
+    parser.add_argument('-d','--directory', help='Directory of the torrent', required=True)
+    parser.add_argument('-u','--userid', help='ID of the user (PUID)', default=0, type=int, nargs='?')
+    parser.add_argument('-g','--groupid', help='ID of the group (PGID)', default=0, type=int, nargs='?')
+    args = parser.parse_args()
+    args.script_dir = cur_dir
+    args.scope = scope_get()
 
-    ## Parse the config
-    config_file = os.path.join(cur_dir, "config.txt")
-    cfg = parse_cfg(config_file, "vs-transmission", args.scope)
+    ## Check whether the passed name and directory are valid
+    if not os.path.isdir(args.directory):
+        errmsg("Passed torrent directory does not exist", "Parsing", (args.directory,)); exit()
+    full_path = os.path.join(args.directory, args.name)
+    if (not os.path.isdir(full_path)) and (not os.path.isfile(full_path)):
+        errmsg("Passed torrent does not exist", "Parsing", (full_path,)); exit()
+    return args
+
+def post_processing(args, cfg):
+    ''' Post processing '''
 
     ## Initialize the logging
     init_logging(args, cfg)
@@ -176,7 +195,7 @@ def post_processing(args):
     abs_path = fix_single_file(args)
 
     ## If there are RAR files extract them into the top directory
-    unrar_files(abs_path)
+    #unrar_files(abs_path, cfg.extensions)
 
     ## Import all non-compressed video files
     source_files = files_find_ext(abs_path, cfg.extensions)
@@ -197,18 +216,20 @@ def post_processing(args):
 def main():
 
     ## Parse the shell arguments
-    args = argparse.Namespace()
-    parser = argparse.ArgumentParser(description='Post Processing of torrents via transmission')
-    parser.add_argument('-n','--name', help='Name of the torrent', required=True)
-    parser.add_argument('-d','--directory', help='Directory of the torrent', required=True)
-    parser.add_argument('-u','--userid', help='ID of the user (PUID)', type=int, required=True)
-    parser.add_argument('-g','--groupid', help='ID of the group (PGID)', type=int, required=True)
-    args = parser.parse_args()
-    args.script_dir = cur_dir
-    args.scope = scope_get()
+    args = parse_arguments()
+
+    ## Parse the config
+    config_file = os.path.join(cur_dir, "config.txt")
+    cfg = parse_cfg(config_file, "vs-transmission", args.scope)
+
+    ## Check for userid and groupid in docker scope
+    if (args.scope == "docker" and (args.userid == 0 or args.groupid == 0)):
+        errmsg("Docker scope requires userid and groupid", "Post-Processing")
+    elif(args.scope == "host"):
+        args.userid, args.groupid = cfg.host_admin
 
     ## Post Processing
-    post_processing(args)
+    post_processing(args, cfg)
 
 if __name__ == "__main__":
     main()
