@@ -135,6 +135,7 @@ def post_processing(args, cfg):
 
     ## Initialize the logging
     init_logging(args, cfg)
+    debugmsg("-" * 35, "Postprocessing")
 
     ## If torrent is a single file create a directory and copy that file
     abs_path = files_fix_single(args)
