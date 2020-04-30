@@ -84,13 +84,6 @@ VS-Playlist-Share: https://github.com/heimdall-syno/VS-Playlist-Share
 
 4. Extend the container configuration by the settings shown below. In the example configuration the transmission container is located at /docker/transmission.
 
-    - Port settings:
-      ```
-      Local port    | Container port
-      --------------+---------------
-      9091          | 9091
-      ```
-
     - Volume settings:
       ```
       File/Folder                                       | Mount-Path            | Type
@@ -104,13 +97,7 @@ VS-Playlist-Share: https://github.com/heimdall-syno/VS-Playlist-Share
       Serien                                            | /serien               | rw
       Anime                                             | /anime                | rw
       docker/handbrake                                  | /handbrake            | rw
-      ```
-
-    - Network settings:
-      ```
-      Name     | Driver
-      ---------+---------
-      bridge   | bridge
+      docker/logs                                       | /logs                 | rw
       ```
 
     - Environment settings:
