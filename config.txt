@@ -49,7 +49,7 @@ host_admin = alshesa
 
 ## Ignore source files for converting with handbrake on basis of strings
 ## in the filename. It is a list of strings divided by commas.
-handbrake_exclude = FuN
+handbrake_exclude = FuN, 2160p, UHDBD, HDR10
 
 ###############################################################################
 [Logging]
