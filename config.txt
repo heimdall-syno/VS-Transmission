@@ -36,10 +36,10 @@ host_handbrake = /volume1/docker/handbrake
 
 ## Define directories watched by the script after a download is finished.
 ## It is a list of strings divided by commas.
-host_watch_dir = /volume1/Filme, /volume1/Serien, /volume1/Dokus, /volume1/Anime, /volume1/video
+host_watch_dir = /volume1/Filme, /volume1/Serien, /volume1/Dokus, /volume1/Anime, /volume1/Disney
 
 ## Define the admin which own new directories and files (e.g. "admin").
-host_admin = alshesa
+host_admin = admin
 
 ###############################################################################
 [Handbrake]
@@ -49,7 +49,13 @@ host_admin = alshesa
 
 ## Ignore source files for converting with handbrake on basis of strings
 ## in the filename. It is a list of strings divided by commas.
-handbrake_exclude = FuN, 2160p, UHDBD, HDR10
+handbrake_exclude = FuN, Bonus, bonus
+
+## Whether 4K files should be converted with another handbrake preset.
+## Make sure you configured/patched Handbrake container to use different presets.
+##   0 - Regardless of the resolution, every file is converted with default preset.
+##   1 - 4K files are placed into another watch dir converted with a diff. preset.
+handbrake_4k = 1
 
 ###############################################################################
 [Logging]

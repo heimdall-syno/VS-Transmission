@@ -4,7 +4,7 @@ from datetime import datetime
 ## Add modules from the submodule (vs-utils)
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(cur_dir, "VS-Utils"))
-from files import directory_create_owner, file_copy, file_copy_args
+from files import create_path_directories, file_copy, file_copy_args
 from files import files_find_ext, files_unrar, files_fix_single
 from prints import errmsg, debugmsg, infomsg, init_logging
 from scope import scope_get, scope_map_path
@@ -95,7 +95,9 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
     """
 
     ## Get all media info about the file
-    codec = ffprobe_file(source)["video_codec"]
+    debugmsg("Analyse the video file for codec and resolution", "Mediainfo")
+    video_info = ffprobe_file(source)
+    codec = video_info["video_codec"]
 
     ## Check whether it is one codec of the config is present
     if codec not in cfg.codecs:
@@ -107,8 +109,16 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
         infomsg("Source file excluded by config", "Postprocessing", (source,))
         return
 
-    ## Copy the video file to the handbrake watch directory
+    ## Switch the watch directory depending on the 4K mode and the resolution
     watch_dir = os.path.join(cfg.handbrake, "watch")
+    if (cfg.hb_4k == 1 and int(video_info['resolutionY']) > 1080):
+        infomsg("4K mode enabled - file is copied to separate watch directory", "Postprocessing", (source,))
+        watch_dir = os.path.join(cfg.handbrake, "watch2")
+    if not os.path.isdir(watch_dir):
+        create_path_directories(watch_dir)
+        os.chown(watch_dir, cfg.host_admin[0], cfg.host_admin[1])
+
+    ## Copy the video file to the handbrake watch directory
     infomsg("Copying file to handbrake watch directory", "Postprocessing", (source,))
     watch_file = file_copy(source, watch_dir, args)
     if not watch_file:
