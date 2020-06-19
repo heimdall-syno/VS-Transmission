@@ -63,7 +63,7 @@ def write_changelog_file(source, source_host, root):
         debugmsg("Create changelog file and add item", "Postprocessing", (changelog_file,))
     with open(changelog_file, 'a') as f: f.write(changelog_content)
 
-def write_convert_file(cfg, source, source_host, root_host, output_host):
+def write_convert_file(cfg, source, source_host, root_host, output_host, watch_host):
     """ Write the convert file to pass necessary filesystem information to handbrake.
 
     Arguments:
@@ -71,7 +71,8 @@ def write_convert_file(cfg, source, source_host, root_host, output_host):
         source {string}      -- Path to the source within docker container.
         source_host {string} -- Path to the source file on the host system.
         root_host {string}   -- Path to the top mount containing the file.
-        output_host {[type]} -- Path to the output file of handbrake.
+        output_host {string} -- Path to the output file of handbrake.
+        watch_host {string}  -- Path to the watch file of handbrake.
     """
 
     ## Create convert file path
@@ -79,7 +80,8 @@ def write_convert_file(cfg, source, source_host, root_host, output_host):
     convert_file = os.path.join(cfg.handbrake, "convert", convert_file)
 
     ## Write the convert file
-    convert_content = "root_host:%s\nsource_host:%s\noutput_host:%s" % (root_host, source_host, output_host)
+    convert_content = "root_host:{}\nsource_host:{}\noutput_host:{}\n" \
+                      "watch_host:{}".format(root_host, source_host, output_host, watch_host)
     with open(convert_file, 'w+') as f: f.write(convert_content)
     debugmsg("Created convert file", "Postprocessing", (convert_file,))
 
@@ -95,9 +97,10 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
     """
 
     ## Get all media info about the file
-    debugmsg("Analyse the video file for codec and resolution", "Mediainfo")
     video_info = ffprobe_file(source)
     codec = video_info["video_codec"]
+    resolution = video_info["resolutionY"]
+    debugmsg("Analyse the video file for codec and resolution", "Mediainfo", (resolution, codec))
 
     ## Check whether it is one codec of the config is present
     if codec not in cfg.codecs:
@@ -110,21 +113,21 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
         return
 
     ## Switch the watch directory depending on the 4K mode and the resolution
-    watch_dir = os.path.join(cfg.handbrake, "watch")
-    if (cfg.hb_4k == 1 and int(video_info['resolutionY']) > 1080):
-        infomsg("4K mode enabled - file is copied to separate watch directory", "Postprocessing", (source,))
-        watch_dir = os.path.join(cfg.handbrake, "watch2")
-    if not os.path.isdir(watch_dir):
-        create_path_directories(watch_dir)
-        os.chown(watch_dir, cfg.host_admin[0], cfg.host_admin[1])
+    watch_host = os.path.join(cfg.handbrake, "watch")
+    if (cfg.hb_4k == 1 and int(resolution) > 2000):
+        infomsg("4K mode enabled - file is copied to separate watch directory", "Postprocessing", (watch_host,))
+        watch_host = os.path.join(cfg.handbrake, "watch2")
+    if not os.path.isdir(watch_host):
+        create_path_directories(watch_host)
+        os.chown(watch_host, cfg.host_admin[0], cfg.host_admin[1])
 
     ## Copy the video file to the handbrake watch directory
-    infomsg("Copying file to handbrake watch directory", "Postprocessing", (source,))
-    watch_file = file_copy(source, watch_dir, args)
+    infomsg("Copying file to handbrake watch directory", "Postprocessing", (watch_host,))
+    watch_file = file_copy(source, watch_host, args)
     if not watch_file:
-        errmsg("Could not copy file to handbrake watch directory", "Postprocessing", (source,))
+        errmsg("Could not copy file to handbrake watch directory", "Postprocessing", (watch_host,))
         return
-    infomsg("Finished copying file", "Postprocessing", (source,))
+    infomsg("Finished copying file", "Postprocessing", (watch_file,))
 
     output_file = os.path.join(cfg.handbrake, "output", os.path.basename(watch_file))
     output_host = scope_map_path(cfg, args, output_file)[0]
@@ -133,7 +136,7 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
         return
 
     ## Write the convert file with all necessary information
-    write_convert_file(cfg, source, source_host, root_host, output_host)
+    write_convert_file(cfg, source, source_host, root_host, output_host, watch_host)
 
 def post_processing(args, cfg):
     """ Post processing.
