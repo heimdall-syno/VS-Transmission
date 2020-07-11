@@ -129,10 +129,18 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
         return
     infomsg("Finished copying file", "Postprocessing", (watch_file,))
 
+    ## Convert the output file into host system path
     output_file = os.path.join(cfg.handbrake, "output", os.path.basename(watch_file))
     output_host = scope_map_path(cfg, args, output_file)[0]
     if output_host == -1:
         errmsg("Could not get the host path of file", "Postprocessing", (output_file))
+        return
+
+    ## Convert the watch file into host system path
+    watch_file = os.path.join(watch_host, os.path.basename(watch_file))
+    watch_host = scope_map_path(cfg, args, watch_file)[0]
+    if watch_host == -1:
+        errmsg("Could not get the host path of watch file", "Postprocessing", (watch_file))
         return
 
     ## Write the convert file with all necessary information
