@@ -109,7 +109,7 @@ def copy_file_to_handbrake(args, cfg, source, source_host, root_host):
 
     ## Only copy files which match no exclude string
     if any(exclude in source for exclude in cfg.exclude):
-        infomsg("Source file excluded by config", "Postprocessing", (source,))
+        infomsg("Source file excluded for handbrake by config", "Postprocessing", (source,))
         return
 
     ## Switch the watch directory depending on the 4K mode and the resolution
