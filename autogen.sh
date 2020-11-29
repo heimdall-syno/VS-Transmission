@@ -14,7 +14,8 @@ pip3 install -r requirements.txt
 
 ## Container - Install python3 and pip and all needed modules
 containername=`docker ps | grep -i transmission | awk '{print $NF}'`
-docker exec -it "$containername" apk add python3 ffmpeg
+docker exec -it "$containername" apk add curl python3 ffmpeg gcc python3-dev musl-dev
+docker exec -it "$containername" apk add --no-cache build-base libffi-dev krb5-dev linux-headers zeromq-dev
 docker exec -it "$containername" curl https://bootstrap.pypa.io/get-pip.py -o /get-pip.py
 docker exec -it "$containername" python3 /get-pip.py &&  rm -rf /get-pip.py
 docker exec -it "$containername" pip3 install configparser
